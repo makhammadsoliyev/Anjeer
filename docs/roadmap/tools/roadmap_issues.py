@@ -418,7 +418,7 @@ def run(args) -> None:
     made: dict[str, dict] = {}
     for p in plan:
         if p.title in existing:
-            made[p.key] = existing[p.title]
+            made[p.key] = dict(existing[p.title], _existing=True)  # keep its current Status
             continue
         issue = g.api("POST", f"repos/{repo}/issues",
                       {"title": p.title, "body": render(p.body, None), "labels": p.labels,
@@ -476,6 +476,7 @@ def run(args) -> None:
         g.gh("project", "field-create", num, "--owner", owner, "--name", "Planned", "--data-type", "DATE")
     f = fields()
     day_opt = {o["name"]: o["id"] for o in f["Day"].get("options", [])}
+    status_opt = {o["name"]: o["id"] for o in f.get("Status", {}).get("options", [])}
 
     for p in plan:
         if not p.in_project:
@@ -489,6 +490,9 @@ def run(args) -> None:
              "--single-select-option-id", day_opt[p.day])
         g.gh("project", "item-edit", "--id", iid, "--project-id", pid, "--field-id", f["Planned"]["id"],
              "--date", p.date.isoformat())
+        if "Todo" in status_opt and not made[p.key].get("_existing"):
+            g.gh("project", "item-edit", "--id", iid, "--project-id", pid, "--field-id", f["Status"]["id"],
+                 "--single-select-option-id", status_opt["Todo"])
         time.sleep(args.pause / 3)
     print(f"Done. Project: https://github.com/users/{owner}/projects/{num}")
 
