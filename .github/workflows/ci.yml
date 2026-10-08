@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore Anjeer.sln
+
+      - name: Format check (.editorconfig)
+        run: dotnet format Anjeer.sln --verify-no-changes --no-restore
+
+      - name: Build (warnings are errors)
+        run: dotnet build Anjeer.sln --no-restore -c Release
+
+      - name: Test
+        run: dotnet test Anjeer.sln --no-build -c Release
