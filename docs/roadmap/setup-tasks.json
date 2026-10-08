@@ -1,0 +1,72 @@
+[
+  {
+    "key": "S01",
+    "week": 3,
+    "date": "2026-10-31",
+    "title": "Install Docker Desktop",
+    "body": "Testcontainers needs Docker from **week 4** (EF Core + Dapper integration tests).\n\n```powershell\nwinget install -e --id Docker.DockerDesktop\n```\nRestart, open Docker Desktop once (it may ask to enable WSL 2), then:\n```powershell\ndocker run --rm hello-world\n```\n\n## Done when\n- [ ] `docker run --rm hello-world` prints *Hello from Docker!*\n- [ ] Docker Desktop starts with Windows (Settings → General)"
+  },
+  {
+    "key": "S02",
+    "week": 7,
+    "date": "2026-11-23",
+    "title": "Create phase 2 issues (weeks 7–11)",
+    "body": "Phase 2 — delivering the MVP — starts today.\n\n```powershell\ngit pull\npy -3 docs\\roadmap\\tools\\roadmap_issues.py --dry-run --weeks 7-11\npy -3 docs\\roadmap\\tools\\roadmap_issues.py --weeks 7-11\n```\n\n## Done when\n- [ ] Weeks 7–11 are on the Board with Planned dates\n- [ ] `docs/roadmap/CURRENT.md` points to week 7"
+  },
+  {
+    "key": "S03",
+    "week": 7,
+    "date": "2026-11-28",
+    "title": "Install Node.js LTS and Angular CLI",
+    "body": "Week 8 (Build day) starts the Angular frontend.\n\n```powershell\nwinget install -e --id OpenJS.NodeJS.LTS\n# new terminal\nnpm install -g @angular/cli\nng version\n```\n\n## Done when\n- [ ] `node -v` and `ng version` work in a new terminal"
+  },
+  {
+    "key": "S04",
+    "week": 9,
+    "date": "2026-12-07",
+    "title": "Create the Azure account",
+    "body": "Week 9 deploys Anjeer to Azure Container Apps. Open the account **this week, not earlier** — the free credit is time-limited.\n\n```powershell\nwinget install -e --id Microsoft.AzureCLI\naz login\naz account show\n```\n\n## Done when\n- [ ] `az account show` lists the subscription\n- [ ] A budget alert is set in Cost Management (e.g. $10/month) so nothing runs up a bill unnoticed"
+  },
+  {
+    "key": "S05",
+    "week": 11,
+    "date": "2026-12-21",
+    "title": "Get the Angular and TypeScript courses (Maximilian Schwarzmüller)",
+    "body": "Phase 3 (weeks 12–17) follows two Udemy courses:\n- *Angular — The Complete Guide*\n- *Understanding TypeScript*\n\nUdemy runs sales often — buy at the sale price before 28 December.\n\n## Done when\n- [ ] Both courses are in your Udemy library"
+  },
+  {
+    "key": "S06",
+    "week": 12,
+    "date": "2026-12-28",
+    "title": "Create phase 3 issues (weeks 12–17)",
+    "body": "Phase 3 — Angular and TypeScript — starts today.\n\n```powershell\ngit pull\npy -3 docs\\roadmap\\tools\\roadmap_issues.py --dry-run --weeks 12-17\npy -3 docs\\roadmap\\tools\\roadmap_issues.py --weeks 12-17\n```\n\n## Done when\n- [ ] Weeks 12–17 are on the Board\n- [ ] `docs/roadmap/CURRENT.md` points to week 12"
+  },
+  {
+    "key": "S07",
+    "week": 16,
+    "date": "2027-01-30",
+    "title": "Create an Azure OpenAI resource and deploy a test model",
+    "body": "Week 18 starts the AI phase. Do this two weeks early, so quota or access problems don't block week 18.\n\n1. Azure portal → **Azure OpenAI** → Create (same resource group as Anjeer, a region that offers the chat and embedding models you need).\n2. Deploy one chat model and one embedding model.\n3. Send one test request from the portal playground.\n\nIf the subscription has no quota for these models (common on free-trial subscriptions), upgrade it to Pay-As-You-Go or request quota now.\n\n## Done when\n- [ ] A chat model and an embedding model are deployed\n- [ ] The playground answers a test prompt\n- [ ] The endpoint and deployment names are noted in `notes/azure.md` (no keys in Git)"
+  },
+  {
+    "key": "S08",
+    "week": 18,
+    "date": "2027-02-08",
+    "title": "Create phase 4 issues (weeks 18–21)",
+    "body": "Phase 4 — AI foundations — starts today.\n\n```powershell\ngit pull\npy -3 docs\\roadmap\\tools\\roadmap_issues.py --weeks 18-21\n```\n\n## Done when\n- [ ] Weeks 18–21 are on the Board\n- [ ] `docs/roadmap/CURRENT.md` points to week 18"
+  },
+  {
+    "key": "S09",
+    "week": 22,
+    "date": "2027-03-08",
+    "title": "Create phase 5 issues (weeks 22–26)",
+    "body": "Phase 5 — RAG — starts today.\n\n```powershell\ngit pull\npy -3 docs\\roadmap\\tools\\roadmap_issues.py --weeks 22-26\n```\n\n## Done when\n- [ ] Weeks 22–26 are on the Board\n- [ ] `docs/roadmap/CURRENT.md` points to week 22"
+  },
+  {
+    "key": "S10",
+    "week": 27,
+    "date": "2027-04-12",
+    "title": "Create phase 6 issues (weeks 27–30)",
+    "body": "Phase 6 — agents, MCP and production — starts today.\n\n```powershell\ngit pull\npy -3 docs\\roadmap\\tools\\roadmap_issues.py --weeks 27-30\n```\n\n## Done when\n- [ ] Weeks 27–30 are on the Board\n- [ ] `docs/roadmap/CURRENT.md` points to week 27"
+  }
+]
