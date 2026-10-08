@@ -3,7 +3,7 @@
 The learning plan behind this repository: one real product (Anjeer, a learning-center platform)
 built while preparing for .NET + AI engineering roles. Three days per week — Learn, Build, Project.
 
-**New here? → [START-HERE.md](START-HERE.md)** · **Current week → [CURRENT.md](CURRENT.md)**
+**New here? → [START-HERE.md](START-HERE.md)** · **Current week → [CURRENT.md](CURRENT.md)** · **Every week → [WEEKLY-GUIDE.md](WEEKLY-GUIDE.md)**
 
 ## How Claude Code uses this folder
 
