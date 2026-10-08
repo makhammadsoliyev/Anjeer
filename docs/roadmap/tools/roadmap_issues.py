@@ -18,6 +18,7 @@ Requirements: GitHub CLI (`gh`) logged in, plus the project scope:
 Usage (from the repository root):
     python docs/roadmap/tools/roadmap_issues.py --dry-run --weeks 1-6      # preview into ./roadmap-issues-preview
     python docs/roadmap/tools/roadmap_issues.py --weeks 1-6                # create phase 1
+    python docs/roadmap/tools/roadmap_issues.py --setup-tasks              # one-time setup tasks
 The script is idempotent: issues whose title already exists are reused, not duplicated,
 so it is safe to re-run after an interruption or a rate-limit stop.
 """
@@ -48,6 +49,7 @@ LABELS = {
     "frontend": ("fbca04", "HTML/CSS and Angular work"),
     "key-week": ("b60205", "⭐ Key week — expect interview questions here"),
     "buffer": ("bfdadc", "Buffer week"),
+    "type:setup": ("0052cc", "One-time setup task with a due date (docs/roadmap/setup-tasks.json)"),
     **{f"phase:{i}": ("ededed", f"Phase {i}") for i in range(1, 7)},
 }
 
@@ -374,14 +376,27 @@ def run(args) -> None:
     owner = repo.split("/")[0]
     blob = f"https://github.com/{repo}/blob/{args.branch}"
 
-    weeks = [parse_week(weeks_dir / f"week-{n:02d}.md") for n in wanted]
     plan: list[Planned] = []
-    for w in weeks:
-        plan += plan_week(w, start + dt.timedelta(weeks=w.number - 1), WEEKDAYS[args.weekday], blob)
+    if args.setup_tasks:
+        # one-time setup tasks (docs/roadmap/setup-tasks.json), each in its week's milestone
+        tasks = json.loads((root / "docs/roadmap/setup-tasks.json").read_text(encoding="utf-8"))
+        weeks = [parse_week(weeks_dir / f"week-{n:02d}.md") for n in sorted({t["week"] for t in tasks})]
+        phase = {w.number: w.phase for w in weeks}
+        for t in tasks:
+            date = dt.date.fromisoformat(t["date"])
+            plan.append(Planned(t["key"], f"{t['key']} Setup · {t['title']}",
+                                f"Planned: **{DAY_NAMES[date.weekday()]} {date:%d.%m.%Y}** · week {t['week']}\n\n{t['body']}\n",
+                                ["type:setup", f"phase:{phase[t['week']]}"], t["week"], None, date, None, True))
+        print(f"Setup tasks: {len(plan)} issues")
+    else:
+        weeks = [parse_week(weeks_dir / f"week-{n:02d}.md") for n in wanted]
+        for w in weeks:
+            plan += plan_week(w, start + dt.timedelta(weeks=w.number - 1), WEEKDAYS[args.weekday], blob)
 
     counts = {k: sum(1 for p in plan if p.key.count(".") == k) for k in range(3)}
-    print(f"Weeks {wanted.start}-{wanted.stop - 1}: {counts[0]} week epics, {counts[1]} day issues, "
-          f"{counts[2]} task sub-issues = {len(plan)} issues")
+    if not args.setup_tasks:
+        print(f"Weeks {wanted.start}-{wanted.stop - 1}: {counts[0]} week epics, {counts[1]} day issues, "
+              f"{counts[2]} task sub-issues = {len(plan)} issues")
 
     if args.dry_run:
         out = Path(args.out)
@@ -486,8 +501,9 @@ def run(args) -> None:
         iid = item["id"]
         g.gh("project", "item-edit", "--id", iid, "--project-id", pid, "--field-id", f["Week"]["id"],
              "--number", str(p.week))
-        g.gh("project", "item-edit", "--id", iid, "--project-id", pid, "--field-id", f["Day"]["id"],
-             "--single-select-option-id", day_opt[p.day])
+        if p.day:
+            g.gh("project", "item-edit", "--id", iid, "--project-id", pid, "--field-id", f["Day"]["id"],
+                 "--single-select-option-id", day_opt[p.day])
         g.gh("project", "item-edit", "--id", iid, "--project-id", pid, "--field-id", f["Planned"]["id"],
              "--date", p.date.isoformat())
         if "Todo" in status_opt and not made[p.key].get("_existing"):
@@ -508,6 +524,8 @@ def main() -> None:
     a.add_argument("--no-project", action="store_true", help="skip the GitHub Project step")
     a.add_argument("--pause", type=float, default=1.5, help="seconds between write requests")
     a.add_argument("--root", default=".", help="repository root")
+    a.add_argument("--setup-tasks", action="store_true",
+                   help="create the one-time setup tasks from docs/roadmap/setup-tasks.json instead of weeks")
     a.add_argument("--dry-run", action="store_true", help="write a preview, send nothing")
     a.add_argument("--out", default="roadmap-issues-preview", help="preview folder for --dry-run")
     run(a.parse_args())
