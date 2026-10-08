@@ -26,10 +26,12 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import os
 import posixpath
 import re
 import subprocess
 import sys
+import tempfile
 import time
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -336,9 +338,18 @@ class GitHub:
 
     def api(self, method: str, path: str, payload: dict | None = None) -> dict | list:
         args = ["api", "--method", method, path, "-H", "Accept: application/vnd.github+json"]
-        if payload is not None:
-            args += ["--input", "-"]
-        out = self.gh(*args, input=json.dumps(payload) if payload is not None else None)
+        if payload is None:
+            out = self.gh(*args)
+        else:
+            # The body goes through a temp file, not stdin: piping into `gh --input -`
+            # arrives empty on some Windows setups ("unexpected end of JSON input").
+            fd, tmp = tempfile.mkstemp(suffix=".json")
+            try:
+                with os.fdopen(fd, "w", encoding="utf-8") as f:
+                    json.dump(payload, f, ensure_ascii=False)
+                out = self.gh(*args, "--input", tmp)
+            finally:
+                os.remove(tmp)
         return json.loads(out) if out.strip() else {}
 
     def paged(self, path: str) -> list:
