@@ -1,0 +1,36 @@
+root = true
+
+[*.cs]
+indent_style = space
+indent_size = 4
+
+# --- Rules the compiler/formatter can enforce (dotnet format + build) ---
+csharp_style_namespace_declarations = file_scoped:warning            # IDE0161
+csharp_prefer_braces = true:warning                                   # IDE0011 — always braces
+csharp_style_prefer_primary_constructors = true:warning               # IDE0290
+dotnet_style_prefer_collection_expression = when_types_loosely_match:warning  # IDE0028, IDE0300-0305
+csharp_prefer_system_threading_lock = true:warning                    # IDE0330
+csharp_style_prefer_pattern_matching = true:suggestion
+csharp_style_pattern_matching_over_is_with_cast_check = true:warning  # IDE0020
+csharp_style_prefer_not_pattern = true:warning                        # IDE0083
+csharp_style_expression_bodied_methods = when_on_single_line:suggestion
+csharp_style_expression_bodied_properties = true:warning
+csharp_style_prefer_simple_using_statement = true:suggestion
+
+dotnet_diagnostic.CA2016.severity = warning   # forward CancellationToken
+dotnet_diagnostic.CA2012.severity = warning   # use ValueTask correctly
+dotnet_diagnostic.CA1849.severity = warning   # call async methods in async methods (.Result etc.)
+dotnet_diagnostic.CA2007.severity = none      # no ConfigureAwait(false) in ASP.NET Core
+dotnet_diagnostic.CS1591.severity = none      # XML docs only where we want them (controllers, DTOs)
+
+# private fields: camelCase, no underscore
+dotnet_naming_rule.private_fields.symbols = private_fields
+dotnet_naming_rule.private_fields.style = camel_case
+dotnet_naming_rule.private_fields.severity = warning
+dotnet_naming_symbols.private_fields.applicable_kinds = field
+dotnet_naming_symbols.private_fields.applicable_accessibilities = private
+dotnet_naming_style.camel_case.capitalization = camel_case
+
+# test method names use underscores: Handle_Should_X_WhenY
+[tests/**/*.cs]
+dotnet_diagnostic.CA1707.severity = none
