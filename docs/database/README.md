@@ -1,82 +1,82 @@
-# Anjeer — bazadagi jadvallar tuzilmasi
+# Anjeer — database structure
 
-Anjeer bazasi UzASBO 2 qoidalari asosida quriladi, lekin faqat **PostgreSQL** uchun va **uch tilda** (o'zbek, rus, ingliz).
-Huquqlar ham UzASBO'dagidek ishlaydi: kodda e'lon qilinadi, bazaga sinxronlanadi, rol orqali beriladi.
-Yadro sxemasi — [`001_core_schema.sql`](001_core_schema.sql): 32 ta jadval. Bu **etalon (maket)**: bazada ishga tushirilmaydi.
+The Anjeer database follows the UzASBO 2 conventions, but for **PostgreSQL only** and in **three languages** (Uzbek, Russian, English).
+Permissions work the same way as in UzASBO: declared in code, synced to the database, granted through roles.
+The core schema is [`001_core_schema.sql`](001_core_schema.sql): 19 tables (the minimal MVP core). It is a **reference (blueprint)**: it is never run against a database.
 
-## Migratsiya strategiyasi: code-first
+## Migration strategy: code-first
 
-- **Bazani kim yaratadi.** Faqat EF Core migratsiyalari (`dotnet ef migrations add`). `.sql` fayl bazada qo'lda bajarilmaydi.
-- **`001_core_schema.sql` nima uchun kerak.** U maqsadli holatni ko'rsatadi: qaysi jadval, ustun, tur, cheklov va boshlang'ich qiymat bo'lishi kerak. EF konfiguratsiyalari va `HasData` shu faylga qarab yoziladi.
-- **Tekshiruv.** Har migratsiyadan keyin `dotnet ef migrations script --idempotent` chiqargan SQL'ni etalon bilan solishtiring. Jadval, ustun, tur, FK, unique, check va indekslar mos kelishi kerak. Constraint nomlari EF'niki bo'lishi mumkin.
-- **PostgreSQL'ga xos narsalar.** `ltree`, pgvector HNSW indeks, partial index kabi imkoniyatlar EF konfiguratsiyasi bilan yoziladi. EF ularni qo'llamasa, migratsiya ichida `migrationBuilder.Sql(...)` bilan qo'shiladi.
-- **Etalonni yangilash.** Yangi yadro jadvali qo'shilsa, avval etalon fayl yangilanadi, keyin migratsiya yoziladi.
+- **Who creates the database.** Only EF Core migrations (`dotnet ef migrations add`). The `.sql` file is never executed by hand.
+- **Why `001_core_schema.sql` exists.** It shows the target state: which tables, columns, types, constraints and seed values must exist. EF configurations and `HasData` are written to match it.
+- **Verification.** After each migration, compare the SQL from `dotnet ef migrations script --idempotent` with the reference. Tables, columns, types, FKs, unique, check constraints and indexes must match. Constraint names may be EF's own.
+- **PostgreSQL-specific features.** `ltree`, pgvector HNSW indexes, partial indexes and similar are written in the EF configuration. If EF does not support one, add it inside the migration with `migrationBuilder.Sql(...)`.
+- **Updating the reference.** When a new core table is added, update the reference file first, then write the migration.
 
-## Sxemalar
+## Schemas
 
-| Sxema | Nima saqlaydi |
+| Schema | What it stores |
 |---|---|
-| `cmn` | Til, holat, status, jadvallar reyestri (`sys_table`), o'zgarish loglari, fayllar, xabarlar katalogi |
-| `adm` | Filiallar (tenant), hududlar, foydalanuvchilar, rollar, huquqlar, hujjat raqamlash |
-| `edu` | Domen: o'quvchi, guruh, fan, mavzu, test, natija, material (3-haftada to'ldiriladi) |
+| `cmn` | Languages, states, statuses, table registry (`sys_table`), document status history, application errors (500) |
+| `adm` | Branches (tenant), users, roles, permissions |
+| `edu` | Domain: students, groups, subjects, topics, tests, results, materials (filled in during week 3) |
 
-`public` sxemasi ishlatilmaydi. Nomlar — kichik harf, `snake_case`.
+The `public` schema is not used. Names are lower-case `snake_case`.
 
-## Jadval turlari (prefiks)
+## Table types (prefixes)
 
-Prefiks jadval turini, tur esa majburiy ustunlarni belgilaydi.
+The prefix defines the table type, and the type defines the required columns.
 
-| Prefiks | Nima saqlaydi | `id` | Majburiy ustunlar | Anjeer'dagi misol |
+| Prefix | What it stores | `id` | Required columns | Anjeer example |
 |---|---|---|---|---|
-| `enum_` | Qat'iy ro'yxat, kodda konstanta | `integer`, qo'lda | `order_code`, `short_name`, `full_name`, `created_at`, `last_modified_at` | `cmn.enum_status`, `cmn.enum_language` |
-| `info_` | Barcha filiallarga umumiy ma'lumotnoma | `integer` identity (by default) | `code`, `short_name`, `full_name`, `state_id` + audit | `adm.info_branch`, `edu.info_subject`, `edu.info_topic` |
-| `hl_` | Bitta filialga tegishli ma'lumotnoma | `integer` identity (always) | `branch_id`, `state_id` + audit | `edu.hl_student`, `edu.hl_group` |
-| `doc_` | Hujjat sarlavhasi (ish jarayoni bor) | `bigint` identity (always) | `doc_number`, `doc_on`, `branch_id`, `status_id`, `table_id` + audit | `edu.doc_assignment` |
-| `doc_..._table` | Hujjat qatorlari | `bigint` identity (always) | `owner_id` → sarlavha + audit | `edu.doc_assignment_table` |
-| `sys_` | Tizim jadvallari: foydalanuvchi, rol, log, holat | identity | kontekstga qarab | `adm.sys_user`, `cmn.sys_table` |
-| `..._translate` | Asosiy jadval matnining tarjimasi | `integer` identity | `owner_id`, `language_id`, `column_name`, `translate_text` + audit | `cmn.enum_status_translate` |
+| `enum_` | Fixed list, a constant in code | `integer`, set by hand | `order_code`, `short_name`, `full_name`, `created_at`, `last_modified_at` | `cmn.enum_status`, `cmn.enum_language` |
+| `info_` | Reference data shared by all branches | `integer` identity (by default) | `code`, `short_name`, `full_name`, `state_id` + audit | `adm.info_branch`, `edu.info_subject`, `edu.info_topic` |
+| `hl_` | Reference data owned by one branch | `integer` identity (always) | `branch_id`, `state_id` + audit | `edu.hl_student`, `edu.hl_group` |
+| `doc_` | Document header (has a workflow) | `bigint` identity (always) | `doc_on`, `branch_id`, `status_id`, `table_id` + audit (`doc_number` if needed) | `edu.doc_assignment` |
+| `doc_..._table` | Document lines | `bigint` identity (always) | `owner_id` → header + audit | `edu.doc_assignment_table` |
+| `sys_` | System tables: users, roles, logs, state | identity | depends on context | `adm.sys_user`, `cmn.sys_table` |
+| `..._translate` | Translations of a main table's text | `integer` identity | `owner_id`, `language_id`, `column_name`, `translate_text` + audit | `cmn.enum_status_translate` |
 
-**Audit ustunlari** (`enum_` dan tashqari hammasida):
+**Audit columns** (on every table except `enum_`):
 `created_at timestamptz not null default now()`, `created_by integer`, `last_modified_at timestamptz`, `last_modified_by integer`.
-`enum_` jadvallarida faqat `created_at` va `last_modified_at` bor.
+`enum_` tables have only `created_at` and `last_modified_at`.
 
-**Tenant = filial.** UzASBO'dagi `organization_id` o'rniga Anjeer'da `branch_id` (`adm.info_branch`) ishlatiladi.
+**Tenant = branch.** Instead of UzASBO's `organization_id`, Anjeer uses `branch_id` (`adm.info_branch`).
 
-**O'chirish.** `on delete cascade` hech qayerda yo'q, qatorlar bazadan o'chirilmaydi:
+**Deletes.** There is no `on delete cascade` anywhere, and rows are never deleted from the database:
 
-| Tur | Qanday o'chiriladi |
+| Type | How it is deleted |
 |---|---|
-| hujjat | `status_id = 5` (Deleted) |
-| ma'lumotnoma | `state_id = 2` (Passiv) |
+| document | `status_id = 5` (Deleted) |
+| reference data | `state_id = 2` (Passive) |
 
-EF Core global query filter shu ustunlarga va `branch_id` ga qo'yiladi.
+EF Core global query filters are applied to these columns and to `branch_id`.
 
-## Nomlash qoidalari
+## Naming rules
 
-| Ob'ekt | Shablon | Misol |
+| Object | Pattern | Example |
 |---|---|---|
-| Primary key | `pk_{jadval}` | `pk_hl_student` |
-| Foreign key | `fk_{jadval}__{bog'langan}` | `fk_hl_student__info_branch` |
-| Unique | `uc_{jadval}__{ustunlar}` | `uc_hl_student__branch__code` |
-| Check | `ck_{jadval}__{ustun}` | `ck_sys_table__table_type` |
-| Index | `ix_{jadval}__{ustunlar}` | `ix_doc_assignment_table__owner` |
+| Primary key | `pk_{table}` | `pk_hl_student` |
+| Foreign key | `fk_{table}__{referenced}` | `fk_hl_student__info_branch` |
+| Unique | `uc_{table}__{columns}` | `uc_hl_student__branch__code` |
+| Check | `ck_{table}__{column}` | `ck_sys_table__table_type` |
+| Index | `ix_{table}__{columns}` | `ix_doc_assignment_table__owner` |
 
-FK faqat `branch_id`, `state_id`, `status_id`, `table_id`, `owner_id`, `language_id` va domen ma'lumotnomalariga qo'yiladi. `created_by` va `last_modified_by` ga FK yo'q.
-PostgreSQL FK uchun indeksni o'zi yaratmaydi, shuning uchun har `owner_id` va tez-tez filtrlanadigan FK'ga indeks qo'yiladi.
+FKs are only placed on `branch_id`, `state_id`, `status_id`, `table_id`, `owner_id`, `language_id` and domain reference tables. `created_by` and `last_modified_by` have no FK.
+PostgreSQL does not create indexes for FKs automatically, so every `owner_id` and every frequently filtered FK gets an index.
 
-## Tillar va tarjima
+## Languages and translation
 
-| `id` | `code` | `culture` | Holat |
+| `id` | `code` | `culture` | Note |
 |---|---|---|---|
-| 1 | `uz` | `uz-Latn-UZ` | Asosiy (`is_default`) |
+| 1 | `uz` | `uz-Latn-UZ` | Default (`is_default`) |
 | 2 | `ru` | `ru-RU` | |
 | 3 | `en` | `en-US` | |
 
-- **Asosiy matn.** Asosiy jadvalning `short_name` va `full_name` ustunlarida **o'zbekcha** matn turadi.
-- **Tarjimalar.** Rus va ingliz tilidagi matn `*_translate` jadvaliga yoziladi: `column_name` ustuniga qaysi ustun tarjimasi ekanligi (`short_name` | `full_name`) yoziladi. Bitta yozuv, til va ustun juftligi uchun faqat bitta tarjima bo'ladi (unique).
-- **Til tanlash.** Foydalanuvchining tili `adm.sys_user.language_id` da saqlanadi. API so'rovida tilni `Accept-Language` sarlavhasi orqali o'zgartirish mumkin.
+- **Main text.** The main table's `short_name` and `full_name` columns hold the **Uzbek** text.
+- **Translations.** Russian and English text goes into the `*_translate` table; `column_name` says which column it translates (`short_name` | `full_name`). There is exactly one translation per record, language and column (unique).
+- **Choosing the language.** The user's language is stored in `adm.sys_user.language_id`. An API request can override it with the `Accept-Language` header.
 
-Tarjimani o'qish: tarjima bo'lmasa, asosiy matn qaytadi.
+Reading a translation (falls back to the main text when no translation exists):
 
 ```sql
 select s.id,
@@ -87,127 +87,154 @@ left join cmn.enum_status_translate t
 order by s.order_code;
 ```
 
-**Qaysi jadvallarga tarjima kerak:**
+**Which tables need translations:**
 
-| Tarjima kerak | Tarjima kerak emas |
+| Needs translation | No translation |
 |---|---|
-| Foydalanuvchiga ko'rinadigan ma'lumotnomalar: status, holat, fan, mavzu, rol, huquq, xabar | Shaxs ismlari, filial nomi, hujjat raqami |
+| User-visible reference data: statuses, states, subjects, topics, roles, permissions | Person names, branch names |
 
-Test savollari va materiallar 3 tilda bo'lsa, ular uchun ham alohida `_translate` jadval yaratiladi.
+If test questions and materials are in 3 languages, they get their own `_translate` tables too.
 
-## Holat va status (boshlang'ich qiymatlar)
+## States and statuses (seed values)
 
-| `enum_state` | | `enum_status` (hujjat ish jarayoni) | |
+| `enum_state` | | `enum_status` (document workflow) | |
 |---|---|---|---|
-| 1 | Faol | 1 | Yaratilgan |
-| 2 | Passiv | 2 | Tasdiqlangan |
-| | | 3 | Rad etilgan |
-| | | 4 | O'zgartirilgan |
-| | | 5 | O'chirilgan |
-| | | 6 | Kutilmoqda — AI kontent o'qituvchi tasdig'ini kutmoqda (roadmap'dagi `PendingApproval`) |
-| | | 7 | Arxivlangan |
+| 1 | Active | 1 | Created |
+| 2 | Passive | 2 | Accepted |
+| | | 3 | Rejected |
+| | | 4 | Modified |
+| | | 5 | Deleted |
+| | | 6 | Waiting — AI content awaiting teacher approval (`PendingApproval` in the roadmap) |
+| | | 7 | Archived |
 
-ID'lar qo'lda beriladi. Kodda ular `enum` sifatida ishlatiladi (`DocumentStatus.Deleted = 5`).
+The main tables store the Uzbek names (`Faol`, `Yaratilgan`, …); Russian and English go into `_translate`.
+IDs are set by hand. In code they are used as an `enum` (`DocumentStatus.Deleted = 5`).
 
-## Huquqlar (UzASBO modeli)
+## Permissions (UzASBO model, two levels)
 
-| Daraja | Jadval | Kim boshqaradi |
+UzASBO's three-level tree (group → sub-group → permission) is reduced to two levels for Anjeer: group → permission.
+
+| Level | Table | Managed by |
 |---|---|---|
-| Huquq guruhi | `adm.sys_permission_group` (+ `_translate`) | **Kod**: `PermissionGroup` enum |
-| Kichik guruh | `adm.sys_permission_sub_group` (+ `_translate`) | **Kod**: `PermissionSubGroup` enum |
-| Huquq | `adm.sys_permission` (+ `_translate`), `code` = `Students.View` | **Kod**: `PermissionCode` enum |
-| Rol | `adm.sys_role` (+ `_translate`), `is_admin`, `is_default` | Admin (UI) |
-| Rol ↔ huquq | `adm.sys_role_permission` | Admin (UI) |
-| Foydalanuvchi ↔ rol | `adm.sys_user_role` | Admin / filial menejeri |
-| Foydalanuvchi ↔ filial | `adm.sys_user_branch` | Admin |
+| Permission group | `adm.sys_permission_group` (+ `_translate`) | **Code**: `PermissionGroup` enum |
+| Permission | `adm.sys_permission` (+ `_translate`), `code` = `Students.View` | **Code**: `PermissionCode` enum |
+| Role | `adm.sys_role` (+ `_translate`), `is_admin`, `is_default` | Admin (UI) |
+| Role ↔ permission | `adm.sys_role_permission` | Admin (UI) |
+| User ↔ role | `adm.sys_user_role` | Admin / branch manager |
+| User ↔ branch | `adm.sys_user_branch` | Admin |
 
-**Huquqlarni SQL bilan qo'shmang.** Yangi huquq faqat kodda — `PermissionCode` enum'iga — qo'shiladi:
+**Do not insert permissions with SQL.** A new permission is added only in code, to the `PermissionCode` enum:
 
 ```csharp
 public enum PermissionCode
 {
-    [Permission(PermissionSubGroup.Students, "O'quvchilarni ko'rish", "Просмотр учеников", "View students")]
+    [Permission(PermissionGroup.Students, "O'quvchilarni ko'rish", "Просмотр учеников", "View students")]
     StudentsView = 1001,
 
-    [Permission(PermissionSubGroup.Students, "O'quvchini tahrirlash", "Редактирование ученика", "Edit students")]
+    [Permission(PermissionGroup.Students, "O'quvchini tahrirlash", "Редактирование ученика", "Edit students")]
     StudentsEdit = 1002,
 }
 ```
 
-Ilova ishga tushganda (`IHostedService`) enum'larni bazaga sinxronlaydi:
-- yangi huquqlarni qo'shadi;
-- nomini va 3 tildagi tarjimasini yangilaydi;
-- kodda o'chirilgan huquqni `state_id = 2` qiladi. Qator o'chirilmaydi, chunki rollarda unga havola qolgan.
+On startup the application (`IHostedService`) syncs the enums to the database:
+- adds new permissions;
+- updates names and the translations in all 3 languages;
+- sets `state_id = 2` for permissions removed from code. The row is not deleted, because roles still reference it.
 
-**Tekshiruv:**
-- Foydalanuvchi huquqlari login paytida yig'iladi va keshlanadi: faol rollari bo'yicha `sys_role_permission` dan olinadi. `is_admin` roli bor foydalanuvchida hammasi bo'ladi.
-- Controller'da `[HasPermission(PermissionCode.StudentsView)]` bilan tekshiriladi.
-- Filial ichidagi ruxsat (resource-based, 404/403) alohida qatlam bo'lib qoladi: huquq "o'quvchilarni ko'ra oladimi?" degan savolga javob beradi, `branch_id` esa "qaysi filialning o'quvchilarini?" degan savolga.
+**Checking:**
+- A user's permissions are collected at login and cached: taken from `sys_role_permission` for their active roles. A user with an `is_admin` role has all permissions.
+- Controllers check them with `[HasPermission(PermissionCode.StudentsView)]`.
+- Access inside a branch (resource-based, 404/403) stays a separate layer: the permission answers "can they view students?", while `branch_id` answers "students of which branch?".
 
-Boshlang'ich rollar: 1 Direktor (CEO, `is_admin`), 2 Filial menejeri, 3 O'qituvchi (`is_default`). Qo'lda qo'shiladigan rollar 101 dan boshlanadi.
+Seed roles: 1 CEO (`is_admin`), 2 Branch manager, 3 Teacher (`is_default`). Roles added by hand start at 101.
 
-## Yadro jadvallari (yaratish tartibi)
+## Core tables (creation order)
 
-| # | Jadval | Vazifasi |
+| # | Table | Purpose |
 |---|---|---|
-| 1 | `cmn.enum_language` | Tillar (uz, ru, en) |
-| 2 | `cmn.enum_state` + `_translate` | Faol / Passiv |
-| 3 | `cmn.enum_status` + `_translate` | Hujjat statusi |
-| 4 | `cmn.enum_app_message_type` + `_translate` | Xato / ogohlantirish / ma'lumot |
-| 5 | `cmn.sys_table` + `_translate` | Barcha jadvallar reyestri; `table_id` shu yerga ishora qiladi |
-| 6 | `cmn.sys_app_message` + `_translate` | Xato va biznes xabarlar katalogi (3 tilda) |
-| 7 | `adm.info_region`, `adm.info_district` + `_translate` | Viloyat → tuman |
-| 8 | `adm.info_branch` | Filial = tenant |
-| 9 | `adm.sys_user`, `adm.sys_user_branch` | Foydalanuvchi va unga ruxsat etilgan filiallar |
-| 10 | `adm.sys_permission_group` → `_sub_group` → `sys_permission` (+ `_translate`) | Huquqlar daraxti |
-| 11 | `adm.sys_role` (+ `_translate`), `sys_role_permission`, `sys_user_role` | Rollar |
-| 12 | `adm.sys_number_template` | Hujjat raqami: filial × jadval × yil bo'yicha hisoblagich |
-| 13 | `cmn.sys_document_change_log`, `cmn.sys_info_change_log` | Status/holat tarixi: kim, qachon, qaysi IP |
-| 14 | `cmn.sys_document_file` | Hujjat fayllari (Azure Blob) |
+| 1 | `cmn.enum_language` | Languages (uz, ru, en) |
+| 2 | `cmn.enum_state` + `_translate` | Active / Passive |
+| 3 | `cmn.enum_status` + `_translate` | Document status |
+| 4 | `cmn.sys_table` | Registry of all tables; `table_id` points here |
+| 5 | `adm.info_branch` | Branch = tenant |
+| 6 | `adm.sys_user`, `adm.sys_user_branch` | Users and the branches they may access |
+| 7 | `adm.sys_permission_group` → `sys_permission` (+ `_translate`) | Permissions: group → permission |
+| 8 | `adm.sys_role` (+ `_translate`), `sys_role_permission`, `sys_user_role` | Roles |
+| 9 | `cmn.sys_document_change_log` | Document status history: who, when, from which IP (AI content approval shows up here too) |
+| 10 | `cmn.sys_app_error` | Unhandled (500) errors |
 
-Log va fayl jadvallari hujjatga FK bilan emas, `table_id` + `doc_id` juftligi bilan bog'lanadi. Shuning uchun bitta jadval barcha hujjat turlariga xizmat qiladi.
+The status history links to a document through the `table_id` + `doc_id` pair, not an FK, so one table serves every document type.
 
-## Domen jadvallari uchun taklif (3-hafta qarori)
+**Deliberately left out** (not needed for the MVP; add them with a migration if required):
 
-Domenni loyihalash 3-haftada sizning qaroringiz. Quyidagi jadval faqat taklif: roadmap'dagi entity'lar shu qoidalarga qanday tushishini ko'rsatadi.
+| UzASBO table | Anjeer replacement |
+|---|---|
+| `INFO_REGION`, `INFO_DISTRICT` | `info_branch.address` text |
+| `SYS_APP_MESSAGE` (message catalog) | The API returns an error code (`Students.NotFound`); the text in 3 languages lives in Angular i18n files |
+| `SYS_PERMISSION_SUB_GROUP` | Two levels: group → permission |
+| `SYS_NUMBER_TEMPLATE` | No official document numbers needed; use `doc_number` if required |
+| `SYS_INFO_CHANGE_LOG`, `SYS_HL_CHANGE_LOG` | Audit columns (`created_by`, `last_modified_by`) |
+| `SYS_DOCUMENT_FILE` | The file location is stored on `edu.hl_material` itself |
 
-| Roadmap entity | Jadval | Nima uchun |
+## Application errors (`cmn.sys_app_error`)
+
+Every unhandled exception — a 500 response — is written to the database as one row.
+
+| Column | What |
+|---|---|
+| `trace_id` | `Activity.Current.TraceId`. Returned to the client as `ProblemDetails.extensions.traceId`; when a user reports it, the error is found by it |
+| `exception_type`, `message`, `stack_trace`, `inner_exception` | Exception details |
+| `request_method`, `request_path` | Path only. **Query string and body are not stored**: they may contain children's personal data |
+| `user_id`, `branch_id`, `ip_address`, `user_agent` | Who and from where |
+| `source`, `environment`, `machine_name` | Which service and environment |
+| `is_resolved`, `resolved_at`, `resolved_by`, `resolution_note` | Whether the error has been reviewed |
+
+How it is written:
+- An `IExceptionHandler` (`AddExceptionHandler`) catches the exception, puts a record into a `Channel<AppError>` and returns the response immediately.
+- A `BackgroundService` saves the records with a **separate** `DbContext`, because the main request's transaction may already be broken.
+- Errors must not be lost if the database is down, so they are always written to Serilog and Application Insights as well. The database is an extra, easy-to-query copy.
+- Old records (for example, older than 90 days) are cleaned up by a background job.
+
+## Proposed domain tables (week 3 decision)
+
+Designing the domain is your decision in week 3. The table below is only a proposal showing how the roadmap entities map to these conventions.
+
+| Roadmap entity | Table | Why |
 |---|---|---|
-| `Branch` | `adm.info_branch` | Tenant, hamma filial uchun umumiy ro'yxat |
-| `User` | `adm.sys_user` | Tizim jadvali |
-| `Student` | `edu.hl_student` | Filialga tegishli. PII shu yerda |
-| `Group` | `edu.hl_group` | Filialga tegishli |
-| `Subject` | `edu.info_subject` + `_translate` | Global, 3 tilda |
-| `Topic` | `edu.info_topic` + `_translate` (`path ltree`) | Global taksonomiya, 3 tilda |
-| `Question` | `edu.info_question` + `_translate` | Global savollar banki |
-| `Assignment` | `edu.doc_assignment` + `edu.doc_assignment_table` (o'quvchilar) | Ish jarayoni bor: yaratildi → yuborildi → yakunlandi |
-| `AssignmentResult` | `edu.doc_assignment_result` + `_table` (javoblar) | Hujjat, `owner_id` → topshiriq |
-| `Material` | `edu.hl_material` (`branch_id` null = umumiy) | Filialniki yoki umumiy |
-| `AiContentRequest` | `edu.doc_ai_content` | `status_id = 6` (Kutilmoqda) → o'qituvchi tasdiqlaydi (2) |
+| `Branch` | `adm.info_branch` | Tenant, a list shared by all branches |
+| `User` | `adm.sys_user` | System table |
+| `Student` | `edu.hl_student` | Owned by a branch. PII lives here |
+| `Group` | `edu.hl_group` | Owned by a branch |
+| `Subject` | `edu.info_subject` + `_translate` | Global, 3 languages |
+| `Topic` | `edu.info_topic` + `_translate` (`path ltree`) | Global taxonomy, 3 languages |
+| `Question` | `edu.info_question` + `_translate` | Global question bank |
+| `Assignment` | `edu.doc_assignment` + `edu.doc_assignment_table` (students) | Has a workflow: created → sent → completed |
+| `AssignmentResult` | `edu.doc_assignment_result` + `_table` (answers) | Document, `owner_id` → assignment |
+| `Material` | `edu.hl_material` (`branch_id` null = shared) | Branch-owned or shared |
+| `AiContentRequest` | `edu.doc_ai_content` | `status_id = 6` (Waiting) → teacher approves (2) |
 
-## Yangi jadval qo'shish tartibi
+## Adding a new table
 
-1. **Jadval tuzilmasi.** Prefiksga mos namunani [`001_core_schema.sql`](001_core_schema.sql) dan oling: ustunlar, turlar va cheklovlar. Yadro jadvali bo'lsa, etalonga ham qo'shing.
-2. **EF Core konfiguratsiya va migratsiya.** Nomlar `snake_case` bo'ladi (`UseSnakeCaseNamingConvention()`). Migratsiya yaratilgach, SQL'ini ko'rib chiqing: indekslar, FK'lar, cascade yo'qligi.
-3. **`cmn.sys_table` ga yozuv.** `id` oralig'i: `cmn` 1–99, `adm` 100–199, `edu` 200 dan. Kodda `TableId` konstantasini ham qo'shing. `table_type` qiymatlari: `ENUM`, `INFO`, `HL`, `DOC`, `TABLE`, `SYS`, `TRANSLATE`.
-4. **Raqamlash (faqat `doc_`).** Hujjat raqami `adm.sys_number_template` orqali beriladi. Filial, jadval va yil bo'yicha qator birinchi hujjatda yaratiladi.
-5. **Tarjima.** Matnli `enum_`/`info_`/`hl_` jadvallar uchun `_translate` jadval yaratiladi.
-6. **Huquqlar.** Kerak bo'lsa `PermissionCode` ga qo'shiladi. SQL yozilmaydi, ilova o'zi sinxronlaydi.
+1. **Table structure.** Take the template for its prefix from [`001_core_schema.sql`](001_core_schema.sql): columns, types and constraints. If it is a core table, add it to the reference too.
+2. **EF Core configuration and migration.** Names are `snake_case` (`UseSnakeCaseNamingConvention()`). After generating the migration, review its SQL: indexes, FKs, no cascades.
+3. **Register it in `cmn.sys_table`.** `id` ranges: `cmn` 1–99, `adm` 100–199, `edu` from 200. Also add a `TableId` constant in code. `table_type` values: `ENUM`, `INFO`, `HL`, `DOC`, `TABLE`, `SYS`, `TRANSLATE`.
+4. **Translation.** Text-bearing `enum_`/`info_`/`hl_` tables get a `_translate` table.
+5. **Permissions.** Add to `PermissionCode` if needed. No SQL; the application syncs them itself.
 
-## Tekshirish
+## Verification
 
 ```sql
--- sxemalar bo'yicha jadvallar soni
+-- table count per schema
 select table_schema, count(*) from information_schema.tables
-where table_schema in ('cmn', 'adm', 'edu') group by 1 order by 1;
+where table_schema in ('cmn', 'adm', 'edu') group by 1 order by 1;   -- reference: cmn 8, adm 11
 
--- reyestrda yo'q jadvallar
+-- tables missing from the registry
 select t.table_schema, t.table_name
 from information_schema.tables t
 left join cmn.sys_table s on s.db_schema_name = t.table_schema and s.db_table_name = t.table_name
 where t.table_schema in ('cmn', 'adm', 'edu') and s.id is null;
 
--- foydalanuvchining amaldagi huquqlari
+-- a user's effective permissions
 select distinct p.code
 from adm.sys_user_role ur
 join adm.sys_role r             on r.id = ur.role_id and r.state_id = 1

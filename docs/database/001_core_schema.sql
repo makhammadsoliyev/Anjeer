@@ -1,26 +1,26 @@
 -- =============================================================================
--- Anjeer — yadro sxemasi: ETALON (maket). BAZADA ISHGA TUSHIRILMAYDI.
+-- Anjeer — core schema: REFERENCE (blueprint). DO NOT RUN IT AGAINST A DATABASE.
 --
--- Baza EF Core migratsiyalari bilan yaratiladi (code-first). Bu fayl — maqsadli holat:
--- jadval, ustun, tur, cheklov va boshlang'ich qiymatlar qanday bo'lishi kerakligini ko'rsatadi.
--- EF konfiguratsiyasi va HasData shu faylga qarab yoziladi; birinchi migratsiya
--- (`dotnet ef migrations script`) shu sxemaga teng natija berishi kerak.
--- Constraint nomlari EF'niki bo'lishi mumkin — jadval/ustun/tur/cheklov mazmuni muhim.
+-- The database is created by EF Core migrations (code-first). This file is the target state:
+-- which tables, columns, types, constraints and seed values must exist.
+-- EF configurations and HasData are written from this file; the first migration
+-- (`dotnet ef migrations script`) must produce an equivalent schema.
+-- Constraint names may be EF's own — tables, columns, types and constraints are what must match.
 --
--- Qoidalar: docs/database/README.md
--- Tillar: 1 uz (asosiy), 2 ru, 3 en. Asosiy jadvalda o'zbekcha nom, tarjimalar *_translate da.
--- O'chirish: ON DELETE CASCADE yo'q. Hujjat — status_id = 5, ma'lumotnoma — state_id = 2.
--- Fayl PostgreSQL 18 da xatosiz bajarilishi tekshirilgan (faqat to'g'riligini tekshirish uchun).
+-- Conventions: docs/database/README.md
+-- Languages: 1 uz (default), 2 ru, 3 en. Main tables hold the Uzbek text; translations live in *_translate.
+-- Deletes: no ON DELETE CASCADE. Document -> status_id = 5, reference record -> state_id = 2.
+-- The file was executed on PostgreSQL 18 without errors (only to check that it is valid).
 -- =============================================================================
 
-create schema if not exists cmn;   -- umumiy: til, holat, status, jadvallar reyestri, loglar, fayllar, xabarlar
-create schema if not exists adm;   -- filiallar, hududlar, foydalanuvchilar, rollar, huquqlar, raqamlash
-create schema if not exists edu;   -- domen (o'quvchi, guruh, test ...) — 3-haftada to'ldiriladi
+create schema if not exists cmn;   -- common: language, state, status, table registry, status history, app errors
+create schema if not exists adm;   -- branches, users, roles, permissions
+create schema if not exists edu;   -- domain (students, groups, tests ...) — designed in week 3
 
--- ----------------------------------------------------------------- cmn: enum'lar
+-- ----------------------------------------------------------------- cmn: enums
 create table cmn.enum_language
 (
-    id                integer not null,          -- qo'lda: 1 uz, 2 ru, 3 en
+    id                integer not null,          -- manual: 1 uz, 2 ru, 3 en
     code              varchar(10) not null,      -- uz | ru | en
     culture           varchar(20) not null,      -- uz-Latn-UZ | ru-RU | en-US
     order_code        varchar(50),
@@ -37,7 +37,7 @@ create table cmn.enum_language
 
 create table cmn.enum_state
 (
-    id                integer not null,          -- 1 Faol, 2 Passiv
+    id                integer not null,          -- 1 Active, 2 Inactive
     order_code        varchar(50),
     short_name        varchar(250) not null,
     full_name         varchar(250) not null,
@@ -70,7 +70,7 @@ create table cmn.enum_state_translate
 
 create table cmn.enum_status
 (
-    id                integer not null,          -- hujjat ish jarayoni; 5 = Deleted
+    id                integer not null,          -- document workflow; 5 = Deleted
     order_code        varchar(50),
     short_name        varchar(250) not null,
     full_name         varchar(250) not null,
@@ -103,43 +103,10 @@ create table cmn.enum_status_translate
     constraint fk_enum_status_translate__enum_language foreign key (language_id) references cmn.enum_language (id)
 );
 
-create table cmn.enum_app_message_type
-(
-    id                integer not null,          -- 1 Error, 2 Warning, 3 Info
-    order_code        varchar(50),
-    short_name        varchar(250) not null,
-    full_name         varchar(250) not null,
-
-    created_at        timestamptz not null default now(),
-    last_modified_at  timestamptz,
-
-    constraint pk_enum_app_message_type primary key (id)
-);
-
-create table cmn.enum_app_message_type_translate
-(
-    id                integer generated always as identity,
-    owner_id          integer not null,
-    language_id       integer not null,
-    column_name       varchar(50) not null,
-    translate_text    varchar(1000) not null,
-
-    created_at        timestamptz not null default now(),
-    created_by        integer,
-    last_modified_at  timestamptz,
-    last_modified_by  integer,
-
-    constraint pk_enum_app_message_type_translate primary key (id),
-    constraint uc_enum_app_message_type_translate__owner__language__column unique (owner_id, language_id, column_name),
-    constraint ck_enum_app_message_type_translate__column_name check (column_name in ('short_name', 'full_name')),
-    constraint fk_enum_app_message_type_translate__enum_app_message_type foreign key (owner_id) references cmn.enum_app_message_type (id),
-    constraint fk_enum_app_message_type_translate__enum_language foreign key (language_id) references cmn.enum_language (id)
-);
-
--- ----------------------------------------------------------------- cmn: jadvallar reyestri
+-- ----------------------------------------------------------------- cmn: table registry
 create table cmn.sys_table
 (
-    id                integer not null,          -- qo'lda; kodda TableId konstantasi
+    id                integer not null,          -- manual; TableId constant in code
     short_name        varchar(250) not null,
     full_name         varchar(250) not null,
     db_schema_name    varchar(63) not null,
@@ -159,160 +126,14 @@ create table cmn.sys_table
     constraint fk_sys_table__parent foreign key (parent_id) references cmn.sys_table (id)
 );
 
-create table cmn.sys_table_translate
-(
-    id                integer generated always as identity,
-    owner_id          integer not null,
-    language_id       integer not null,
-    column_name       varchar(50) not null,
-    translate_text    varchar(1000) not null,
-
-    created_at        timestamptz not null default now(),
-    created_by        integer,
-    last_modified_at  timestamptz,
-    last_modified_by  integer,
-
-    constraint pk_sys_table_translate primary key (id),
-    constraint uc_sys_table_translate__owner__language__column unique (owner_id, language_id, column_name),
-    constraint ck_sys_table_translate__column_name check (column_name in ('short_name', 'full_name')),
-    constraint fk_sys_table_translate__sys_table foreign key (owner_id) references cmn.sys_table (id),
-    constraint fk_sys_table_translate__enum_language foreign key (language_id) references cmn.enum_language (id)
-);
-
-create table cmn.sys_app_message
-(
-    id                integer generated by default as identity,
-    code              varchar(100) not null,     -- kodda ishlatiladigan kalit, masalan Students.NotFound
-    dev_code          varchar(100),
-    msg_text          varchar(1000) not null,    -- o'zbekcha; ru/en — translate da
-    msg_description   varchar(2000),
-    msg_type_id       integer not null,
-    state_id          integer not null default 1,
-
-    created_at        timestamptz not null default now(),
-    created_by        integer,
-    last_modified_at  timestamptz,
-    last_modified_by  integer,
-
-    constraint pk_sys_app_message primary key (id),
-    constraint uc_sys_app_message__code unique (code),
-    constraint fk_sys_app_message__enum_app_message_type foreign key (msg_type_id) references cmn.enum_app_message_type (id),
-    constraint fk_sys_app_message__enum_state foreign key (state_id) references cmn.enum_state (id)
-);
-
-create table cmn.sys_app_message_translate
-(
-    id                integer generated always as identity,
-    owner_id          integer not null,
-    language_id       integer not null,
-    column_name       varchar(50) not null,      -- msg_text | msg_description
-    translate_text    varchar(2000) not null,
-
-    created_at        timestamptz not null default now(),
-    created_by        integer,
-    last_modified_at  timestamptz,
-    last_modified_by  integer,
-
-    constraint pk_sys_app_message_translate primary key (id),
-    constraint uc_sys_app_message_translate__owner__language__column unique (owner_id, language_id, column_name),
-    constraint ck_sys_app_message_translate__column_name check (column_name in ('msg_text', 'msg_description')),
-    constraint fk_sys_app_message_translate__sys_app_message foreign key (owner_id) references cmn.sys_app_message (id),
-    constraint fk_sys_app_message_translate__enum_language foreign key (language_id) references cmn.enum_language (id)
-);
-
--- ----------------------------------------------------------------- adm: hudud va filial (tenant)
-create table adm.info_region
-(
-    id                integer generated by default as identity,
-    order_code        varchar(50),
-    code              varchar(50) not null,
-    soato             varchar(20),
-    short_name        varchar(250) not null,
-    full_name         varchar(250) not null,
-    state_id          integer not null default 1,
-
-    created_at        timestamptz not null default now(),
-    created_by        integer,
-    last_modified_at  timestamptz,
-    last_modified_by  integer,
-
-    constraint pk_info_region primary key (id),
-    constraint uc_info_region__code unique (code),
-    constraint fk_info_region__enum_state foreign key (state_id) references cmn.enum_state (id)
-);
-
-create table adm.info_region_translate
-(
-    id                integer generated always as identity,
-    owner_id          integer not null,
-    language_id       integer not null,
-    column_name       varchar(50) not null,
-    translate_text    varchar(1000) not null,
-
-    created_at        timestamptz not null default now(),
-    created_by        integer,
-    last_modified_at  timestamptz,
-    last_modified_by  integer,
-
-    constraint pk_info_region_translate primary key (id),
-    constraint uc_info_region_translate__owner__language__column unique (owner_id, language_id, column_name),
-    constraint ck_info_region_translate__column_name check (column_name in ('short_name', 'full_name')),
-    constraint fk_info_region_translate__info_region foreign key (owner_id) references adm.info_region (id),
-    constraint fk_info_region_translate__enum_language foreign key (language_id) references cmn.enum_language (id)
-);
-
-create table adm.info_district
-(
-    id                integer generated by default as identity,
-    order_code        varchar(50),
-    code              varchar(50) not null,
-    soato             varchar(20),
-    short_name        varchar(250) not null,
-    full_name         varchar(250) not null,
-    region_id         integer not null,
-    state_id          integer not null default 1,
-
-    created_at        timestamptz not null default now(),
-    created_by        integer,
-    last_modified_at  timestamptz,
-    last_modified_by  integer,
-
-    constraint pk_info_district primary key (id),
-    constraint uc_info_district__code unique (code),
-    constraint fk_info_district__info_region foreign key (region_id) references adm.info_region (id),
-    constraint fk_info_district__enum_state foreign key (state_id) references cmn.enum_state (id)
-);
-create index ix_info_district__region on adm.info_district (region_id);
-
-create table adm.info_district_translate
-(
-    id                integer generated always as identity,
-    owner_id          integer not null,
-    language_id       integer not null,
-    column_name       varchar(50) not null,
-    translate_text    varchar(1000) not null,
-
-    created_at        timestamptz not null default now(),
-    created_by        integer,
-    last_modified_at  timestamptz,
-    last_modified_by  integer,
-
-    constraint pk_info_district_translate primary key (id),
-    constraint uc_info_district_translate__owner__language__column unique (owner_id, language_id, column_name),
-    constraint ck_info_district_translate__column_name check (column_name in ('short_name', 'full_name')),
-    constraint fk_info_district_translate__info_district foreign key (owner_id) references adm.info_district (id),
-    constraint fk_info_district_translate__enum_language foreign key (language_id) references cmn.enum_language (id)
-);
-
+-- ----------------------------------------------------------------- adm: branch (tenant)
 create table adm.info_branch
 (
-    id                integer generated by default as identity,   -- tenant: branch_id shu yerga
+    id                integer generated by default as identity,   -- tenant: branch_id points here
     order_code        varchar(50),
     code              varchar(50) not null,
     short_name        varchar(250) not null,
     full_name         varchar(250) not null,
-    region_id         integer,
-    district_id       integer,
     address           varchar(500),
     phone_number      varchar(20),
     state_id          integer not null default 1,
@@ -324,12 +145,10 @@ create table adm.info_branch
 
     constraint pk_info_branch primary key (id),
     constraint uc_info_branch__code unique (code),
-    constraint fk_info_branch__info_region foreign key (region_id) references adm.info_region (id),
-    constraint fk_info_branch__info_district foreign key (district_id) references adm.info_district (id),
     constraint fk_info_branch__enum_state foreign key (state_id) references cmn.enum_state (id)
 );
 
--- ----------------------------------------------------------------- adm: foydalanuvchi
+-- ----------------------------------------------------------------- adm: users
 create table adm.sys_user
 (
     id                    integer generated always as identity,
@@ -338,7 +157,7 @@ create table adm.sys_user
     full_name             varchar(250) not null,
     phone_number          varchar(20),
     email                 varchar(250),
-    branch_id             integer,                    -- standart filial; CEO uchun null bo'lishi mumkin
+    branch_id             integer,                    -- default branch; may be null for the CEO
     language_id           integer not null default 1,
     enable_two_factor     boolean not null default false,
     last_access_time      timestamptz,
@@ -359,7 +178,7 @@ create table adm.sys_user
 
 create table adm.sys_user_branch
 (
-    id                integer generated always as identity,   -- foydalanuvchiga ruxsat etilgan filiallar
+    id                integer generated always as identity,   -- branches the user may access
     user_id           integer not null,
     branch_id         integer not null,
     state_id          integer not null default 1,
@@ -377,10 +196,10 @@ create table adm.sys_user_branch
 );
 create index ix_sys_user_branch__branch on adm.sys_user_branch (branch_id);
 
--- ----------------------------------------------------------------- adm: huquqlar daraxti (kodda PermissionCode -> ilova sinxronlaydi)
+-- ----------------------------------------------------------------- adm: permissions (group -> permission; declared as PermissionGroup/PermissionCode in code, synced by the app)
 create table adm.sys_permission_group
 (
-    id                integer not null,           -- = PermissionGroup enum qiymati
+    id                integer not null,           -- = PermissionGroup enum value
     code              varchar(100) not null,
     order_code        varchar(50),
     short_name        varchar(250) not null,
@@ -417,57 +236,15 @@ create table adm.sys_permission_group_translate
     constraint fk_sys_permission_group_translate__enum_language foreign key (language_id) references cmn.enum_language (id)
 );
 
-create table adm.sys_permission_sub_group
-(
-    id                integer not null,           -- = PermissionSubGroup enum qiymati
-    code              varchar(100) not null,
-    order_code        varchar(50),
-    short_name        varchar(250) not null,
-    full_name         varchar(250) not null,
-    group_id          integer not null,
-    state_id          integer not null default 1,
-
-    created_at        timestamptz not null default now(),
-    created_by        integer,
-    last_modified_at  timestamptz,
-    last_modified_by  integer,
-
-    constraint pk_sys_permission_sub_group primary key (id),
-    constraint uc_sys_permission_sub_group__code unique (code),
-    constraint fk_sys_permission_sub_group__sys_permission_group foreign key (group_id) references adm.sys_permission_group (id),
-    constraint fk_sys_permission_sub_group__enum_state foreign key (state_id) references cmn.enum_state (id)
-);
-create index ix_sys_permission_sub_group__group on adm.sys_permission_sub_group (group_id);
-
-create table adm.sys_permission_sub_group_translate
-(
-    id                integer generated always as identity,
-    owner_id          integer not null,
-    language_id       integer not null,
-    column_name       varchar(50) not null,
-    translate_text    varchar(1000) not null,
-
-    created_at        timestamptz not null default now(),
-    created_by        integer,
-    last_modified_at  timestamptz,
-    last_modified_by  integer,
-
-    constraint pk_sys_permission_sub_group_translate primary key (id),
-    constraint uc_sys_permission_sub_group_translate__owner__language__column unique (owner_id, language_id, column_name),
-    constraint ck_sys_permission_sub_group_translate__column_name check (column_name in ('short_name', 'full_name')),
-    constraint fk_sys_permission_sub_group_translate__sys_permission_sub_group foreign key (owner_id) references adm.sys_permission_sub_group (id),
-    constraint fk_sys_permission_sub_group_translate__enum_language foreign key (language_id) references cmn.enum_language (id)
-);
-
 create table adm.sys_permission
 (
-    id                integer not null,           -- = PermissionCode enum qiymati
-    code              varchar(100) not null,      -- masalan Students.View, Students.Edit
+    id                integer not null,           -- = PermissionCode enum value
+    code              varchar(100) not null,      -- e.g. Students.View, Students.Edit
     order_code        varchar(50),
     short_name        varchar(250) not null,
     full_name         varchar(250) not null,
-    sub_group_id      integer not null,
-    state_id          integer not null default 1, -- kodda o'chirilgan huquq -> 2 (Passiv), qator o'chmaydi
+    group_id          integer not null,           -- = PermissionGroup
+    state_id          integer not null default 1, -- removed from code -> 2 (Inactive); the row is kept
 
     created_at        timestamptz not null default now(),
     created_by        integer,
@@ -476,10 +253,10 @@ create table adm.sys_permission
 
     constraint pk_sys_permission primary key (id),
     constraint uc_sys_permission__code unique (code),
-    constraint fk_sys_permission__sys_permission_sub_group foreign key (sub_group_id) references adm.sys_permission_sub_group (id),
+    constraint fk_sys_permission__sys_permission_group foreign key (group_id) references adm.sys_permission_group (id),
     constraint fk_sys_permission__enum_state foreign key (state_id) references cmn.enum_state (id)
 );
-create index ix_sys_permission__sub_group on adm.sys_permission (sub_group_id);
+create index ix_sys_permission__group on adm.sys_permission (group_id);
 
 create table adm.sys_permission_translate
 (
@@ -507,8 +284,8 @@ create table adm.sys_role
     order_code        varchar(50),
     short_name        varchar(250) not null,
     full_name         varchar(250) not null,
-    is_admin          boolean not null default false,   -- barcha huquqlar + barcha filiallar
-    is_default        boolean not null default false,   -- yangi foydalanuvchiga avtomatik
+    is_admin          boolean not null default false,   -- every permission + every branch
+    is_default        boolean not null default false,   -- assigned to new users automatically
     state_id          integer not null default 1,
 
     created_at        timestamptz not null default now(),
@@ -578,28 +355,7 @@ create table adm.sys_user_role
 );
 create index ix_sys_user_role__role on adm.sys_user_role (role_id);
 
--- ----------------------------------------------------------------- adm: hujjat raqamlash
-create table adm.sys_number_template
-(
-    id                integer generated always as identity,
-    table_id          integer not null,           -- qaysi DOC_ jadval
-    branch_id         integer not null,
-    finance_year      integer not null,
-    template          varchar(100) not null default '{year}-{number:000000}',
-    current_number    integer not null default 0,
-
-    created_at        timestamptz not null default now(),
-    created_by        integer,
-    last_modified_at  timestamptz,
-    last_modified_by  integer,
-
-    constraint pk_sys_number_template primary key (id),
-    constraint uc_sys_number_template__branch__table__year unique (branch_id, table_id, finance_year),
-    constraint fk_sys_number_template__sys_table foreign key (table_id) references cmn.sys_table (id),
-    constraint fk_sys_number_template__info_branch foreign key (branch_id) references adm.info_branch (id)
-);
-
--- ----------------------------------------------------------------- cmn: o'zgarish loglari va fayllar (FK'siz table_id + doc_id juftligi)
+-- ----------------------------------------------------------------- cmn: document status history and app errors
 create table cmn.sys_document_change_log
 (
     id                bigint generated always as identity,
@@ -621,51 +377,37 @@ create table cmn.sys_document_change_log
 );
 create index ix_sys_document_change_log__table__doc on cmn.sys_document_change_log (table_id, doc_id);
 
-create table cmn.sys_info_change_log
+create table cmn.sys_app_error
 (
-    id                bigint generated always as identity,   -- INFO_ va HL_ yozuvlari uchun
-    date_at           timestamptz not null default now(),
+    id                bigint generated always as identity,   -- unhandled (500) exceptions
+    occurred_at       timestamptz not null default now(),
+    trace_id          varchar(100) not null,     -- also returned to the client in ProblemDetails
+    status_code       integer not null default 500,
+    request_method    varchar(10),
+    request_path      varchar(2000),             -- query string and body are NOT stored (PII)
+    exception_type    varchar(500) not null,
+    message           varchar(4000) not null,
+    stack_trace       text,
+    inner_exception   text,
+    source            varchar(100) not null,     -- service name: Anjeer.Api, Anjeer.Worker ...
+    environment       varchar(50),
+    machine_name      varchar(100),
     user_id           integer,
-    user_info         varchar(500),
-    table_id          integer not null,
-    record_id         bigint not null,
-    state_id          integer,
     branch_id         integer,
     ip_address        inet,
     user_agent        varchar(1000),
-    message           varchar(2000),
-    request_trace_id  varchar(100),
+    is_resolved       boolean not null default false,
+    resolved_at       timestamptz,
+    resolved_by       integer,
+    resolution_note   varchar(2000),
 
-    constraint pk_sys_info_change_log primary key (id),
-    constraint fk_sys_info_change_log__sys_table foreign key (table_id) references cmn.sys_table (id),
-    constraint fk_sys_info_change_log__enum_state foreign key (state_id) references cmn.enum_state (id)
+    constraint pk_sys_app_error primary key (id)
 );
-create index ix_sys_info_change_log__table__record on cmn.sys_info_change_log (table_id, record_id);
+create index ix_sys_app_error__occurred_at on cmn.sys_app_error (occurred_at desc);
+create index ix_sys_app_error__trace_id on cmn.sys_app_error (trace_id);
+create index ix_sys_app_error__unresolved on cmn.sys_app_error (occurred_at desc) where not is_resolved;
 
-create table cmn.sys_document_file
-(
-    id                bigint generated always as identity,
-    table_id          integer not null,
-    document_id       bigint not null,
-    file_name         varchar(500) not null,
-    file_extension    varchar(20),
-    file_size         bigint not null,
-    content_type      varchar(200),
-    storage_path      varchar(1000) not null,     -- Azure Blob: container/path
-    branch_id         integer,
-
-    created_at        timestamptz not null default now(),
-    created_by        integer,
-    last_modified_at  timestamptz,
-    last_modified_by  integer,
-
-    constraint pk_sys_document_file primary key (id),
-    constraint fk_sys_document_file__sys_table foreign key (table_id) references cmn.sys_table (id),
-    constraint fk_sys_document_file__info_branch foreign key (branch_id) references adm.info_branch (id)
-);
-create index ix_sys_document_file__table__document on cmn.sys_document_file (table_id, document_id);
-
--- ============================================================================= boshlang'ich qiymatlar
+-- ============================================================================= seed data
 insert into cmn.enum_language (id, code, culture, order_code, short_name, full_name, is_default) values
     (1, 'uz', 'uz-Latn-UZ', '1', 'O''zbekcha', 'O''zbek tili', true),
     (2, 'ru', 'ru-RU',      '2', 'Русский',    'Русский язык', false),
@@ -718,18 +460,11 @@ insert into cmn.enum_status_translate (owner_id, language_id, column_name, trans
     (7, 3, 'short_name', 'Archived'),
     (7, 3, 'full_name', 'Archived');
 
-insert into cmn.enum_app_message_type (id, order_code, short_name, full_name) values
-    (1, '1', 'Xato', 'Xato'), (2, '2', 'Ogohlantirish', 'Ogohlantirish'), (3, '3', 'Ma''lumot', 'Ma''lumot');
-insert into cmn.enum_app_message_type_translate (owner_id, language_id, column_name, translate_text) values
-    (1, 2, 'short_name', 'Ошибка'), (1, 2, 'full_name', 'Ошибка'), (1, 3, 'short_name', 'Error'), (1, 3, 'full_name', 'Error'),
-    (2, 2, 'short_name', 'Предупреждение'), (2, 2, 'full_name', 'Предупреждение'), (2, 3, 'short_name', 'Warning'), (2, 3, 'full_name', 'Warning'),
-    (3, 2, 'short_name', 'Информация'), (3, 2, 'full_name', 'Информация'), (3, 3, 'short_name', 'Info'), (3, 3, 'full_name', 'Info');
-
 insert into adm.sys_role (id, order_code, short_name, full_name, is_admin, is_default) overriding system value values
     (1, '1', 'Direktor (CEO)', 'Direktor (CEO)', true, false),
     (2, '2', 'Filial menejeri', 'Filial menejeri', false, false),
     (3, '3', 'O''qituvchi', 'O''qituvchi', false, true);
-select setval(pg_get_serial_sequence('adm.sys_role', 'id'), 100);   -- qo'lda qo'shiladigan rollar 101 dan
+select setval(pg_get_serial_sequence('adm.sys_role', 'id'), 100);   -- roles added by hand start at 101
 insert into adm.sys_role_translate (owner_id, language_id, column_name, translate_text) values
     (1, 2, 'short_name', 'Директор'),
     (1, 2, 'full_name', 'Директор'),
@@ -744,42 +479,29 @@ insert into adm.sys_role_translate (owner_id, language_id, column_name, translat
     (3, 3, 'short_name', 'Teacher'),
     (3, 3, 'full_name', 'Teacher');
 
--- jadvallar reyestri: id oralig'i — cmn 1–99, adm 100–199, edu 200 dan
+-- table registry: id ranges — cmn 1–99, adm 100–199, edu from 200
 insert into cmn.sys_table (id, short_name, full_name, db_schema_name, db_table_name, table_type) values
     (1, 'enum_language', 'enum_language', 'cmn', 'enum_language', 'ENUM'),
     (2, 'enum_state', 'enum_state', 'cmn', 'enum_state', 'ENUM'),
     (3, 'enum_state_translate', 'enum_state_translate', 'cmn', 'enum_state_translate', 'TRANSLATE'),
     (4, 'enum_status', 'enum_status', 'cmn', 'enum_status', 'ENUM'),
     (5, 'enum_status_translate', 'enum_status_translate', 'cmn', 'enum_status_translate', 'TRANSLATE'),
-    (6, 'enum_app_message_type', 'enum_app_message_type', 'cmn', 'enum_app_message_type', 'ENUM'),
-    (7, 'enum_app_message_type_translate', 'enum_app_message_type_translate', 'cmn', 'enum_app_message_type_translate', 'TRANSLATE'),
-    (8, 'sys_table', 'sys_table', 'cmn', 'sys_table', 'SYS'),
-    (9, 'sys_table_translate', 'sys_table_translate', 'cmn', 'sys_table_translate', 'TRANSLATE'),
-    (10, 'sys_app_message', 'sys_app_message', 'cmn', 'sys_app_message', 'SYS'),
-    (11, 'sys_app_message_translate', 'sys_app_message_translate', 'cmn', 'sys_app_message_translate', 'TRANSLATE'),
-    (100, 'info_region', 'info_region', 'adm', 'info_region', 'INFO'),
-    (101, 'info_region_translate', 'info_region_translate', 'adm', 'info_region_translate', 'TRANSLATE'),
-    (102, 'info_district', 'info_district', 'adm', 'info_district', 'INFO'),
-    (103, 'info_district_translate', 'info_district_translate', 'adm', 'info_district_translate', 'TRANSLATE'),
-    (104, 'info_branch', 'info_branch', 'adm', 'info_branch', 'INFO'),
-    (105, 'sys_user', 'sys_user', 'adm', 'sys_user', 'SYS'),
-    (106, 'sys_user_branch', 'sys_user_branch', 'adm', 'sys_user_branch', 'SYS'),
-    (107, 'sys_permission_group', 'sys_permission_group', 'adm', 'sys_permission_group', 'SYS'),
-    (108, 'sys_permission_group_translate', 'sys_permission_group_translate', 'adm', 'sys_permission_group_translate', 'TRANSLATE'),
-    (109, 'sys_permission_sub_group', 'sys_permission_sub_group', 'adm', 'sys_permission_sub_group', 'SYS'),
-    (110, 'sys_permission_sub_group_translate', 'sys_permission_sub_group_translate', 'adm', 'sys_permission_sub_group_translate', 'TRANSLATE'),
-    (111, 'sys_permission', 'sys_permission', 'adm', 'sys_permission', 'SYS'),
-    (112, 'sys_permission_translate', 'sys_permission_translate', 'adm', 'sys_permission_translate', 'TRANSLATE'),
-    (113, 'sys_role', 'sys_role', 'adm', 'sys_role', 'SYS'),
-    (114, 'sys_role_translate', 'sys_role_translate', 'adm', 'sys_role_translate', 'TRANSLATE'),
-    (115, 'sys_role_permission', 'sys_role_permission', 'adm', 'sys_role_permission', 'SYS'),
-    (116, 'sys_user_role', 'sys_user_role', 'adm', 'sys_user_role', 'SYS'),
-    (117, 'sys_number_template', 'sys_number_template', 'adm', 'sys_number_template', 'SYS'),
-    (12, 'sys_document_change_log', 'sys_document_change_log', 'cmn', 'sys_document_change_log', 'SYS'),
-    (13, 'sys_info_change_log', 'sys_info_change_log', 'cmn', 'sys_info_change_log', 'SYS'),
-    (14, 'sys_document_file', 'sys_document_file', 'cmn', 'sys_document_file', 'SYS');
+    (6, 'sys_table', 'sys_table', 'cmn', 'sys_table', 'SYS'),
+    (100, 'info_branch', 'info_branch', 'adm', 'info_branch', 'INFO'),
+    (101, 'sys_user', 'sys_user', 'adm', 'sys_user', 'SYS'),
+    (102, 'sys_user_branch', 'sys_user_branch', 'adm', 'sys_user_branch', 'SYS'),
+    (103, 'sys_permission_group', 'sys_permission_group', 'adm', 'sys_permission_group', 'SYS'),
+    (104, 'sys_permission_group_translate', 'sys_permission_group_translate', 'adm', 'sys_permission_group_translate', 'TRANSLATE'),
+    (105, 'sys_permission', 'sys_permission', 'adm', 'sys_permission', 'SYS'),
+    (106, 'sys_permission_translate', 'sys_permission_translate', 'adm', 'sys_permission_translate', 'TRANSLATE'),
+    (107, 'sys_role', 'sys_role', 'adm', 'sys_role', 'SYS'),
+    (108, 'sys_role_translate', 'sys_role_translate', 'adm', 'sys_role_translate', 'TRANSLATE'),
+    (109, 'sys_role_permission', 'sys_role_permission', 'adm', 'sys_role_permission', 'SYS'),
+    (110, 'sys_user_role', 'sys_user_role', 'adm', 'sys_user_role', 'SYS'),
+    (7, 'sys_document_change_log', 'sys_document_change_log', 'cmn', 'sys_document_change_log', 'SYS'),
+    (8, 'sys_app_error', 'sys_app_error', 'cmn', 'sys_app_error', 'SYS');
 
--- *_translate jadvallarini asosiy jadvaliga bog'lash (parent_id)
+-- link each *_translate table to its main table (parent_id)
 update cmn.sys_table t set parent_id = p.id
 from cmn.sys_table p
 where t.table_type = 'TRANSLATE'

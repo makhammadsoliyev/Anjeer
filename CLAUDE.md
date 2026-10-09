@@ -15,6 +15,12 @@
 - Reference the issue in commits (`... (closes #N)` for a finished task sub-issue) and use
   `Closes #N` for the day issue in the PR description.
 
+## Language
+- Everything written to GitHub is in English: issues, sub-issues, PR titles and descriptions,
+  review and issue comments, commit messages, code comments and docs in the repo.
+- Chat with the user may be in Uzbek; translate before anything goes to GitHub.
+- Exception: seed/data values and user-facing translations (uz/ru text in *_translate, i18n files).
+
 ## Database
 - PostgreSQL only. Conventions (prefixes enum_/info_/hl_/doc_/sys_/_translate, audit columns,
   branch_id tenant, naming pk_/fk_/uc_/ck_/ix_, no cascade deletes, 3 languages uz/ru/en):
