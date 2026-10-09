@@ -2,7 +2,7 @@
 
 Anjeer bazasi UzASBO 2 qoidalari asosida quriladi, lekin faqat **PostgreSQL** uchun va **uch tilda** (o'zbek, rus, ingliz).
 Huquqlar ham UzASBO'dagidek ishlaydi: kodda e'lon qilinadi, bazaga sinxronlanadi, rol orqali beriladi.
-Yadro sxemasi — [`001_core_schema.sql`](001_core_schema.sql): 32 ta jadval. Bu **etalon (maket)**: bazada ishga tushirilmaydi.
+Yadro sxemasi — [`001_core_schema.sql`](001_core_schema.sql): 19 ta jadval (MVP uchun minimal yadro). Bu **etalon (maket)**: bazada ishga tushirilmaydi.
 
 ## Migratsiya strategiyasi: code-first
 
@@ -16,8 +16,8 @@ Yadro sxemasi — [`001_core_schema.sql`](001_core_schema.sql): 32 ta jadval. Bu
 
 | Sxema | Nima saqlaydi |
 |---|---|
-| `cmn` | Til, holat, status, jadvallar reyestri (`sys_table`), o'zgarish loglari, fayllar, xabarlar katalogi |
-| `adm` | Filiallar (tenant), hududlar, foydalanuvchilar, rollar, huquqlar, hujjat raqamlash |
+| `cmn` | Til, holat, status, jadvallar reyestri (`sys_table`), hujjat status tarixi, ilova xatolari (500) |
+| `adm` | Filiallar (tenant), foydalanuvchilar, rollar, huquqlar |
 | `edu` | Domen: o'quvchi, guruh, fan, mavzu, test, natija, material (3-haftada to'ldiriladi) |
 
 `public` sxemasi ishlatilmaydi. Nomlar — kichik harf, `snake_case`.
@@ -31,7 +31,7 @@ Prefiks jadval turini, tur esa majburiy ustunlarni belgilaydi.
 | `enum_` | Qat'iy ro'yxat, kodda konstanta | `integer`, qo'lda | `order_code`, `short_name`, `full_name`, `created_at`, `last_modified_at` | `cmn.enum_status`, `cmn.enum_language` |
 | `info_` | Barcha filiallarga umumiy ma'lumotnoma | `integer` identity (by default) | `code`, `short_name`, `full_name`, `state_id` + audit | `adm.info_branch`, `edu.info_subject`, `edu.info_topic` |
 | `hl_` | Bitta filialga tegishli ma'lumotnoma | `integer` identity (always) | `branch_id`, `state_id` + audit | `edu.hl_student`, `edu.hl_group` |
-| `doc_` | Hujjat sarlavhasi (ish jarayoni bor) | `bigint` identity (always) | `doc_number`, `doc_on`, `branch_id`, `status_id`, `table_id` + audit | `edu.doc_assignment` |
+| `doc_` | Hujjat sarlavhasi (ish jarayoni bor) | `bigint` identity (always) | `doc_on`, `branch_id`, `status_id`, `table_id` + audit (`doc_number` — kerak bo'lsa) | `edu.doc_assignment` |
 | `doc_..._table` | Hujjat qatorlari | `bigint` identity (always) | `owner_id` → sarlavha + audit | `edu.doc_assignment_table` |
 | `sys_` | Tizim jadvallari: foydalanuvchi, rol, log, holat | identity | kontekstga qarab | `adm.sys_user`, `cmn.sys_table` |
 | `..._translate` | Asosiy jadval matnining tarjimasi | `integer` identity | `owner_id`, `language_id`, `column_name`, `translate_text` + audit | `cmn.enum_status_translate` |
@@ -91,7 +91,7 @@ order by s.order_code;
 
 | Tarjima kerak | Tarjima kerak emas |
 |---|---|
-| Foydalanuvchiga ko'rinadigan ma'lumotnomalar: status, holat, fan, mavzu, rol, huquq, xabar | Shaxs ismlari, filial nomi, hujjat raqami |
+| Foydalanuvchiga ko'rinadigan ma'lumotnomalar: status, holat, fan, mavzu, rol, huquq | Shaxs ismlari, filial nomi |
 
 Test savollari va materiallar 3 tilda bo'lsa, ular uchun ham alohida `_translate` jadval yaratiladi.
 
@@ -109,12 +109,13 @@ Test savollari va materiallar 3 tilda bo'lsa, ular uchun ham alohida `_translate
 
 ID'lar qo'lda beriladi. Kodda ular `enum` sifatida ishlatiladi (`DocumentStatus.Deleted = 5`).
 
-## Huquqlar (UzASBO modeli)
+## Huquqlar (UzASBO modeli, ikki daraja)
+
+UzASBO'dagi uch darajali daraxt (guruh → kichik guruh → huquq) Anjeer uchun ikki darajaga qisqartirilgan: guruh → huquq.
 
 | Daraja | Jadval | Kim boshqaradi |
 |---|---|---|
 | Huquq guruhi | `adm.sys_permission_group` (+ `_translate`) | **Kod**: `PermissionGroup` enum |
-| Kichik guruh | `adm.sys_permission_sub_group` (+ `_translate`) | **Kod**: `PermissionSubGroup` enum |
 | Huquq | `adm.sys_permission` (+ `_translate`), `code` = `Students.View` | **Kod**: `PermissionCode` enum |
 | Rol | `adm.sys_role` (+ `_translate`), `is_admin`, `is_default` | Admin (UI) |
 | Rol ↔ huquq | `adm.sys_role_permission` | Admin (UI) |
@@ -126,10 +127,10 @@ ID'lar qo'lda beriladi. Kodda ular `enum` sifatida ishlatiladi (`DocumentStatus.
 ```csharp
 public enum PermissionCode
 {
-    [Permission(PermissionSubGroup.Students, "O'quvchilarni ko'rish", "Просмотр учеников", "View students")]
+    [Permission(PermissionGroup.Students, "O'quvchilarni ko'rish", "Просмотр учеников", "View students")]
     StudentsView = 1001,
 
-    [Permission(PermissionSubGroup.Students, "O'quvchini tahrirlash", "Редактирование ученика", "Edit students")]
+    [Permission(PermissionGroup.Students, "O'quvchini tahrirlash", "Редактирование ученика", "Edit students")]
     StudentsEdit = 1002,
 }
 ```
@@ -153,19 +154,45 @@ Boshlang'ich rollar: 1 Direktor (CEO, `is_admin`), 2 Filial menejeri, 3 O'qituvc
 | 1 | `cmn.enum_language` | Tillar (uz, ru, en) |
 | 2 | `cmn.enum_state` + `_translate` | Faol / Passiv |
 | 3 | `cmn.enum_status` + `_translate` | Hujjat statusi |
-| 4 | `cmn.enum_app_message_type` + `_translate` | Xato / ogohlantirish / ma'lumot |
-| 5 | `cmn.sys_table` + `_translate` | Barcha jadvallar reyestri; `table_id` shu yerga ishora qiladi |
-| 6 | `cmn.sys_app_message` + `_translate` | Xato va biznes xabarlar katalogi (3 tilda) |
-| 7 | `adm.info_region`, `adm.info_district` + `_translate` | Viloyat → tuman |
-| 8 | `adm.info_branch` | Filial = tenant |
-| 9 | `adm.sys_user`, `adm.sys_user_branch` | Foydalanuvchi va unga ruxsat etilgan filiallar |
-| 10 | `adm.sys_permission_group` → `_sub_group` → `sys_permission` (+ `_translate`) | Huquqlar daraxti |
-| 11 | `adm.sys_role` (+ `_translate`), `sys_role_permission`, `sys_user_role` | Rollar |
-| 12 | `adm.sys_number_template` | Hujjat raqami: filial × jadval × yil bo'yicha hisoblagich |
-| 13 | `cmn.sys_document_change_log`, `cmn.sys_info_change_log` | Status/holat tarixi: kim, qachon, qaysi IP |
-| 14 | `cmn.sys_document_file` | Hujjat fayllari (Azure Blob) |
+| 4 | `cmn.sys_table` | Barcha jadvallar reyestri; `table_id` shu yerga ishora qiladi |
+| 5 | `adm.info_branch` | Filial = tenant |
+| 6 | `adm.sys_user`, `adm.sys_user_branch` | Foydalanuvchi va unga ruxsat etilgan filiallar |
+| 7 | `adm.sys_permission_group` → `sys_permission` (+ `_translate`) | Huquqlar: guruh → huquq |
+| 8 | `adm.sys_role` (+ `_translate`), `sys_role_permission`, `sys_user_role` | Rollar |
+| 9 | `cmn.sys_document_change_log` | Hujjat status tarixi: kim, qachon, qaysi IP (AI kontent tasdig'i ham shu yerda ko'rinadi) |
+| 10 | `cmn.sys_app_error` | Qayta ishlanmagan (500) xatolar |
 
-Log va fayl jadvallari hujjatga FK bilan emas, `table_id` + `doc_id` juftligi bilan bog'lanadi. Shuning uchun bitta jadval barcha hujjat turlariga xizmat qiladi.
+Status tarixi hujjatga FK bilan emas, `table_id` + `doc_id` juftligi bilan bog'lanadi. Shuning uchun bitta jadval barcha hujjat turlariga xizmat qiladi.
+
+**Atayin olib tashlangan** (MVP'ga kerak emas, zarur bo'lsa migratsiya bilan qo'shiladi):
+
+| UzASBO jadvali | Anjeer'da o'rniga |
+|---|---|
+| `INFO_REGION`, `INFO_DISTRICT` | `info_branch.address` matni |
+| `SYS_APP_MESSAGE` (xabarlar katalogi) | API xato kodini qaytaradi (`Students.NotFound`), 3 tildagi matn Angular i18n fayllarida |
+| `SYS_PERMISSION_SUB_GROUP` | Ikki daraja: guruh → huquq |
+| `SYS_NUMBER_TEMPLATE` | Rasmiy hujjat raqami kerak emas; kerak bo'lsa `doc_number` |
+| `SYS_INFO_CHANGE_LOG`, `SYS_HL_CHANGE_LOG` | Audit ustunlari (`created_by`, `last_modified_by`) |
+| `SYS_DOCUMENT_FILE` | Fayl manzili `edu.hl_material` ning o'zida |
+
+## Ilova xatolari (`cmn.sys_app_error`)
+
+Qayta ishlanmagan har bir istisno — 500 javobi — bazaga bitta qator bo'lib yoziladi.
+
+| Ustun | Nima |
+|---|---|
+| `trace_id` | `Activity.Current.TraceId`. Mijozga `ProblemDetails.extensions.traceId` sifatida qaytadi, foydalanuvchi uni yuborsa, xato shu bo'yicha topiladi |
+| `exception_type`, `message`, `stack_trace`, `inner_exception` | Istisno ma'lumoti |
+| `request_method`, `request_path` | Faqat yo'l. **Query string va body yozilmaydi**: ularda bolalarning shaxsiy ma'lumoti bo'lishi mumkin |
+| `user_id`, `branch_id`, `ip_address`, `user_agent` | Kim va qayerdan |
+| `source`, `environment`, `machine_name` | Qaysi servis va muhit |
+| `is_resolved`, `resolved_at`, `resolved_by`, `resolution_note` | Xato ko'rib chiqildi-mi |
+
+Qanday yoziladi:
+- `IExceptionHandler` (`AddExceptionHandler`) istisnoni ushlaydi, yozuvni `Channel<AppError>` ga qo'yadi va javobni darhol qaytaradi.
+- Fon servisi (`BackgroundService`) yozuvlarni bazaga **alohida** `DbContext` bilan saqlaydi. Asosiy so'rovning tranzaksiyasi allaqachon buzilgan bo'lishi mumkin.
+- Baza ishlamay qolsa, xato baribir yo'qolmasligi kerak. Shuning uchun xatolar har doim Serilog va Application Insights'ga ham yoziladi. Baza — qo'shimcha, qidirish qulay nusxa.
+- Eski yozuvlar (masalan, 90 kundan oshgani) fon vazifasi bilan tozalanadi.
 
 ## Domen jadvallari uchun taklif (3-hafta qarori)
 
@@ -190,16 +217,15 @@ Domenni loyihalash 3-haftada sizning qaroringiz. Quyidagi jadval faqat taklif: r
 1. **Jadval tuzilmasi.** Prefiksga mos namunani [`001_core_schema.sql`](001_core_schema.sql) dan oling: ustunlar, turlar va cheklovlar. Yadro jadvali bo'lsa, etalonga ham qo'shing.
 2. **EF Core konfiguratsiya va migratsiya.** Nomlar `snake_case` bo'ladi (`UseSnakeCaseNamingConvention()`). Migratsiya yaratilgach, SQL'ini ko'rib chiqing: indekslar, FK'lar, cascade yo'qligi.
 3. **`cmn.sys_table` ga yozuv.** `id` oralig'i: `cmn` 1–99, `adm` 100–199, `edu` 200 dan. Kodda `TableId` konstantasini ham qo'shing. `table_type` qiymatlari: `ENUM`, `INFO`, `HL`, `DOC`, `TABLE`, `SYS`, `TRANSLATE`.
-4. **Raqamlash (faqat `doc_`).** Hujjat raqami `adm.sys_number_template` orqali beriladi. Filial, jadval va yil bo'yicha qator birinchi hujjatda yaratiladi.
-5. **Tarjima.** Matnli `enum_`/`info_`/`hl_` jadvallar uchun `_translate` jadval yaratiladi.
-6. **Huquqlar.** Kerak bo'lsa `PermissionCode` ga qo'shiladi. SQL yozilmaydi, ilova o'zi sinxronlaydi.
+4. **Tarjima.** Matnli `enum_`/`info_`/`hl_` jadvallar uchun `_translate` jadval yaratiladi.
+5. **Huquqlar.** Kerak bo'lsa `PermissionCode` ga qo'shiladi. SQL yozilmaydi, ilova o'zi sinxronlaydi.
 
 ## Tekshirish
 
 ```sql
 -- sxemalar bo'yicha jadvallar soni
 select table_schema, count(*) from information_schema.tables
-where table_schema in ('cmn', 'adm', 'edu') group by 1 order by 1;
+where table_schema in ('cmn', 'adm', 'edu') group by 1 order by 1;   -- etalon: cmn 8, adm 11
 
 -- reyestrda yo'q jadvallar
 select t.table_schema, t.table_name
