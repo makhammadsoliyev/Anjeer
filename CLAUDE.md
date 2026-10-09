@@ -18,5 +18,7 @@
 ## Database
 - PostgreSQL only. Conventions (prefixes enum_/info_/hl_/doc_/sys_/_translate, audit columns,
   branch_id tenant, naming pk_/fk_/uc_/ck_/ix_, no cascade deletes, 3 languages uz/ru/en):
-  docs/database/README.md. Core schema: docs/database/001_core_schema.sql.
+  docs/database/README.md. docs/database/001_core_schema.sql is a REFERENCE (target schema) —
+  never run it; the database is created only by EF Core migrations (code-first), and new
+  migrations must match the reference (tables, columns, types, constraints, seeds).
 - Permissions are declared in code (PermissionCode) and synced to adm.sys_permission — never inserted by SQL.

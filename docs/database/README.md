@@ -2,7 +2,15 @@
 
 Anjeer bazasi UzASBO 2 qoidalari asosida quriladi, lekin faqat **PostgreSQL** uchun va **uch tilda** (o'zbek, rus, ingliz).
 Huquqlar ham UzASBO'dagidek ishlaydi: kodda e'lon qilinadi, bazaga sinxronlanadi, rol orqali beriladi.
-Yadro sxemasi — [`001_core_schema.sql`](001_core_schema.sql): 32 ta jadval, PostgreSQL 18 da tekshirilgan.
+Yadro sxemasi — [`001_core_schema.sql`](001_core_schema.sql): 32 ta jadval. Bu **etalon (maket)**: bazada ishga tushirilmaydi.
+
+## Migratsiya strategiyasi: code-first
+
+- **Bazani kim yaratadi.** Faqat EF Core migratsiyalari (`dotnet ef migrations add`). `.sql` fayl bazada qo'lda bajarilmaydi.
+- **`001_core_schema.sql` nima uchun kerak.** U maqsadli holatni ko'rsatadi: qaysi jadval, ustun, tur, cheklov va boshlang'ich qiymat bo'lishi kerak. EF konfiguratsiyalari va `HasData` shu faylga qarab yoziladi.
+- **Tekshiruv.** Har migratsiyadan keyin `dotnet ef migrations script --idempotent` chiqargan SQL'ni etalon bilan solishtiring. Jadval, ustun, tur, FK, unique, check va indekslar mos kelishi kerak. Constraint nomlari EF'niki bo'lishi mumkin.
+- **PostgreSQL'ga xos narsalar.** `ltree`, pgvector HNSW indeks, partial index kabi imkoniyatlar EF konfiguratsiyasi bilan yoziladi. EF ularni qo'llamasa, migratsiya ichida `migrationBuilder.Sql(...)` bilan qo'shiladi.
+- **Etalonni yangilash.** Yangi yadro jadvali qo'shilsa, avval etalon fayl yangilanadi, keyin migratsiya yoziladi.
 
 ## Sxemalar
 
@@ -179,7 +187,7 @@ Domenni loyihalash 3-haftada sizning qaroringiz. Quyidagi jadval faqat taklif: r
 
 ## Yangi jadval qo'shish tartibi
 
-1. **Jadval.** Prefiksga mos shablonni tanlang: [`001_core_schema.sql`](001_core_schema.sql) dagi o'sha turdagi jadvalni ko'chiring. PK, FK, UNIQUE va CHECK jadval ichida, yuqoridagi nomlar bilan yoziladi.
+1. **Jadval tuzilmasi.** Prefiksga mos namunani [`001_core_schema.sql`](001_core_schema.sql) dan oling: ustunlar, turlar va cheklovlar. Yadro jadvali bo'lsa, etalonga ham qo'shing.
 2. **EF Core konfiguratsiya va migratsiya.** Nomlar `snake_case` bo'ladi (`UseSnakeCaseNamingConvention()`). Migratsiya yaratilgach, SQL'ini ko'rib chiqing: indekslar, FK'lar, cascade yo'qligi.
 3. **`cmn.sys_table` ga yozuv.** `id` oralig'i: `cmn` 1–99, `adm` 100–199, `edu` 200 dan. Kodda `TableId` konstantasini ham qo'shing. `table_type` qiymatlari: `ENUM`, `INFO`, `HL`, `DOC`, `TABLE`, `SYS`, `TRANSLATE`.
 4. **Raqamlash (faqat `doc_`).** Hujjat raqami `adm.sys_number_template` orqali beriladi. Filial, jadval va yil bo'yicha qator birinchi hujjatda yaratiladi.

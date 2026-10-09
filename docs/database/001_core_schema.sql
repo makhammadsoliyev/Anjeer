@@ -1,9 +1,16 @@
 -- =============================================================================
--- Anjeer — yadro sxemasi (PostgreSQL 16+)
+-- Anjeer — yadro sxemasi: ETALON (maket). BAZADA ISHGA TUSHIRILMAYDI.
+--
+-- Baza EF Core migratsiyalari bilan yaratiladi (code-first). Bu fayl — maqsadli holat:
+-- jadval, ustun, tur, cheklov va boshlang'ich qiymatlar qanday bo'lishi kerakligini ko'rsatadi.
+-- EF konfiguratsiyasi va HasData shu faylga qarab yoziladi; birinchi migratsiya
+-- (`dotnet ef migrations script`) shu sxemaga teng natija berishi kerak.
+-- Constraint nomlari EF'niki bo'lishi mumkin — jadval/ustun/tur/cheklov mazmuni muhim.
+--
 -- Qoidalar: docs/database/README.md
 -- Tillar: 1 uz (asosiy), 2 ru, 3 en. Asosiy jadvalda o'zbekcha nom, tarjimalar *_translate da.
--- O'chirish: hech qayerda ON DELETE CASCADE yo'q. Hujjat — status_id = 5, ma'lumotnoma — state_id = 2.
--- Bu fayl idempotent emas: bo'sh bazada bir marta bajariladi.
+-- O'chirish: ON DELETE CASCADE yo'q. Hujjat — status_id = 5, ma'lumotnoma — state_id = 2.
+-- Fayl PostgreSQL 18 da xatosiz bajarilishi tekshirilgan (faqat to'g'riligini tekshirish uchun).
 -- =============================================================================
 
 create schema if not exists cmn;   -- umumiy: til, holat, status, jadvallar reyestri, loglar, fayllar, xabarlar
