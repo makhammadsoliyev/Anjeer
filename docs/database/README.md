@@ -1,8 +1,8 @@
 # Anjeer — database structure
 
-The Anjeer database follows the UzASBO 2 conventions, but for **PostgreSQL only** and in **three languages** (Uzbek, Russian, English).
+The Anjeer database follows the UzASBO 2 conventions, but for **PostgreSQL only** and in **four languages** (Uzbek Latin, Uzbek Cyrillic, Russian, English).
 Permissions work the same way as in UzASBO: declared in code, synced to the database, granted through roles.
-The core schema is [`001_core_schema.sql`](001_core_schema.sql): 19 tables (the minimal MVP core). It is a **reference (blueprint)**: it is never run against a database.
+The core schema is [`001_core_schema.sql`](001_core_schema.sql): 21 tables (the minimal MVP core). It is a **reference (blueprint)**: it is never run against a database.
 
 ## Migration strategy: code-first
 
@@ -17,7 +17,7 @@ The core schema is [`001_core_schema.sql`](001_core_schema.sql): 19 tables (the 
 | Schema | What it stores |
 |---|---|
 | `cmn` | Languages, states, statuses, table registry (`sys_table`), document status history, application errors (500) |
-| `adm` | Branches (tenant), users, roles, permissions |
+| `adm` | Branches (tenant), user accounts (staff, teachers, students), user types, roles, permissions |
 | `edu` | Domain: students, groups, subjects, topics, tests, results, materials (filled in during week 3) |
 
 The `public` schema is not used. Names are lower-case `snake_case`.
@@ -28,7 +28,7 @@ The prefix defines the table type, and the type defines the required columns.
 
 | Prefix | What it stores | `id` | Required columns | Anjeer example |
 |---|---|---|---|---|
-| `enum_` | Fixed list, a constant in code | `integer`, set by hand | `order_code`, `short_name`, `full_name`, `created_at`, `last_modified_at` | `cmn.enum_status`, `cmn.enum_language` |
+| `enum_` | Fixed list, a constant in code | `integer`, set by hand | `order_code`, `short_name`, `full_name`, `created_at`, `last_modified_at` | `cmn.enum_status`, `cmn.enum_language`, `adm.enum_user_type` |
 | `info_` | Reference data shared by all branches | `integer` identity (by default) | `code`, `short_name`, `full_name`, `state_id` + audit | `adm.info_branch`, `edu.info_subject`, `edu.info_topic` |
 | `hl_` | Reference data owned by one branch | `integer` identity (always) | `branch_id`, `state_id` + audit | `edu.hl_student`, `edu.hl_group` |
 | `doc_` | Document header (has a workflow) | `bigint` identity (always) | `doc_on`, `branch_id`, `status_id`, `table_id` + audit (`doc_number` if needed) | `edu.doc_assignment` |
@@ -68,13 +68,16 @@ PostgreSQL does not create indexes for FKs automatically, so every `owner_id` an
 
 | `id` | `code` | `culture` | Note |
 |---|---|---|---|
-| 1 | `uz` | `uz-Latn-UZ` | Default (`is_default`) |
-| 2 | `ru` | `ru-RU` | |
-| 3 | `en` | `en-US` | |
+| 1 | `uz` | `uz-Latn-UZ` | Default (`is_default`), shown 1st |
+| 4 | `uz-Cyrl` | `uz-Cyrl-UZ` | Uzbek Cyrillic, shown 2nd (`order_code = 2`) |
+| 2 | `ru` | `ru-RU` | shown 3rd |
+| 3 | `en` | `en-US` | shown 4th |
 
-- **Main text.** The main table's `short_name` and `full_name` columns hold the **Uzbek** text.
-- **Translations.** Russian and English text goes into the `*_translate` table; `column_name` says which column it translates (`short_name` | `full_name`). There is exactly one translation per record, language and column (unique).
-- **Choosing the language.** The user's language is stored in `adm.sys_user.language_id`. An API request can override it with the `Accept-Language` header.
+- **IDs are never renumbered.** A new language gets the next `id`; its place in the UI comes from `order_code`. That is why Uzbek Cyrillic is `id = 4` but is listed second.
+- **Main text.** The main table's `short_name` and `full_name` columns hold the **Uzbek (Latin)** text.
+- **Translations.** Uzbek Cyrillic, Russian and English text goes into the `*_translate` table; `column_name` says which column it translates (`short_name` | `full_name`). There is exactly one translation per record, language and column (unique).
+- **Uzbek Cyrillic is stored, not generated.** Latin → Cyrillic transliteration is not one-to-one (`ye`/`e`, `ts`, the soft sign, loanwords), so seed values and permission names carry a hand-written Cyrillic text. If a Cyrillic translation is missing, the API may fall back to transliterating the Latin text instead of showing Latin.
+- **Choosing the language.** The user's language is stored in `adm.sys_user.language_id`. An API request can override it with the `Accept-Language` header (`uz`, `uz-Cyrl`, `ru`, `en`).
 
 Reading a translation (falls back to the main text when no translation exists):
 
@@ -91,9 +94,9 @@ order by s.order_code;
 
 | Needs translation | No translation |
 |---|---|
-| User-visible reference data: statuses, states, subjects, topics, roles, permissions | Person names, branch names |
+| User-visible reference data: statuses, states, user types, subjects, topics, roles, permissions | Person names, branch names |
 
-If test questions and materials are in 3 languages, they get their own `_translate` tables too.
+If test questions and materials are multilingual, they get their own `_translate` tables too.
 
 ## States and statuses (seed values)
 
@@ -107,7 +110,7 @@ If test questions and materials are in 3 languages, they get their own `_transla
 | | | 6 | Waiting — AI content awaiting teacher approval (`PendingApproval` in the roadmap) |
 | | | 7 | Archived |
 
-The main tables store the Uzbek names (`Faol`, `Yaratilgan`, …); Russian and English go into `_translate`.
+The main tables store the Uzbek Latin names (`Faol`, `Yaratilgan`, …); Uzbek Cyrillic (`Фаол`, `Яратилган`, …), Russian and English go into `_translate`.
 IDs are set by hand. In code they are used as an `enum` (`DocumentStatus.Deleted = 5`).
 
 ## Permissions (UzASBO model, two levels)
@@ -118,7 +121,7 @@ UzASBO's three-level tree (group → sub-group → permission) is reduced to two
 |---|---|---|
 | Permission group | `adm.sys_permission_group` (+ `_translate`) | **Code**: `PermissionGroup` enum |
 | Permission | `adm.sys_permission` (+ `_translate`), `code` = `Students.View` | **Code**: `PermissionCode` enum |
-| Role | `adm.sys_role` (+ `_translate`), `is_admin`, `is_default` | Admin (UI) |
+| Role | `adm.sys_role` (+ `_translate`), `user_type_id`, `is_admin`, `is_default` | Admin (UI) |
 | Role ↔ permission | `adm.sys_role_permission` | Admin (UI) |
 | User ↔ role | `adm.sys_user_role` | Admin / branch manager |
 | User ↔ branch | `adm.sys_user_branch` | Admin |
@@ -128,17 +131,18 @@ UzASBO's three-level tree (group → sub-group → permission) is reduced to two
 ```csharp
 public enum PermissionCode
 {
-    [Permission(PermissionGroup.Students, "O'quvchilarni ko'rish", "Просмотр учеников", "View students")]
+    //                                     uz (Latin)                uz-Cyrl                   ru                         en
+    [Permission(PermissionGroup.Students, "O'quvchilarni ko'rish", "Ўқувчиларни кўриш",     "Просмотр учеников",       "View students")]
     StudentsView = 1001,
 
-    [Permission(PermissionGroup.Students, "O'quvchini tahrirlash", "Редактирование ученика", "Edit students")]
+    [Permission(PermissionGroup.Students, "O'quvchini tahrirlash", "Ўқувчини таҳрирлаш",    "Редактирование ученика",  "Edit students")]
     StudentsEdit = 1002,
 }
 ```
 
 On startup the application (`IHostedService`) syncs the enums to the database:
 - adds new permissions;
-- updates names and the translations in all 3 languages;
+- updates names and the translations in all 4 languages;
 - sets `state_id = 2` for permissions removed from code. The row is not deleted, because roles still reference it.
 
 **Checking:**
@@ -146,7 +150,49 @@ On startup the application (`IHostedService`) syncs the enums to the database:
 - Controllers check them with `[HasPermission(PermissionCode.StudentsView)]`.
 - Access inside a branch (resource-based, 404/403) stays a separate layer: the permission answers "can they view students?", while `branch_id` answers "students of which branch?".
 
-Seed roles: 1 CEO (`is_admin`), 2 Branch manager, 3 Teacher (`is_default`). Roles added by hand start at 101.
+Seed roles:
+
+| `id` | Role | `user_type_id` | Flags |
+|---|---|---|---|
+| 1 | CEO | 1 Staff | `is_admin` |
+| 2 | Branch manager | 1 Staff | |
+| 3 | Teacher | 2 Teacher | `is_default` |
+| 4 | Student | 3 Student | `is_default` |
+
+Roles added by hand start at 101.
+
+## Accounts: staff, teachers and students
+
+Teachers and students will be able to sign up and sign in themselves, so every person who logs in has one row in `adm.sys_user`, whatever their type.
+
+| `adm.enum_user_type` | Who | How the account appears |
+|---|---|---|
+| 1 Staff | CEO, branch managers | Created by an admin. No self sign-up |
+| 2 Teacher | Teachers | Self sign-up, or created by a branch manager |
+| 3 Student | Students | Self sign-up, or created by a branch manager |
+
+**Rules:**
+- `user_type_id` is fixed for the account's lifetime.
+- A role belongs to one user type (`sys_role.user_type_id`). The application only lets a role be granted to a user of the same type, so a student account can never receive a staff role. This check lives in the application, not in a constraint.
+- On sign-up the account gets the default role of its type (`is_default`, at most one per type; enforced by `uc_sys_role__user_type__default`).
+- A fresh self sign-up has no branch: `branch_id` is null and there are no `sys_user_branch` rows. With the query filter on `branch_id` it sees no data until a branch manager links it to a branch.
+
+**Sign-in / sign-up columns on `adm.sys_user`:**
+
+| Column | Why |
+|---|---|
+| `user_name`, `phone_number`, `email` | Each one is unique. Students and teachers usually sign in by phone. Stored normalized (lower-case, phone in E.164) |
+| `password_hash` | Nullable: an account created by a manager has no password until the person sets one |
+| `phone_confirmed_at`, `email_confirmed_at` | Set after the SMS / email code is confirmed |
+| `failed_login_count`, `lockout_end_at` | Brute-force protection on the public sign-in endpoint |
+| `security_stamp` | Changed on password or role change; tokens issued with the old stamp stop working |
+
+**Person record vs. account.** A teacher *is* their account: `edu.hl_group.teacher_id` points to `adm.sys_user`. A student is different: the branch registers the student (`edu.hl_student`, with birth date and parent phone) long before — or without — an account, so `edu.hl_student.user_id` is a **nullable, unique** link to `adm.sys_user`. Students without accounts keep working exactly as before.
+
+**Your decisions (week 6, together with the role matrix):**
+- How a student's account gets linked to their `hl_student` row: an invite code from the branch, a phone-number match plus manager approval, or the manager creates the account.
+- Whether a teacher's self sign-up needs a manager's approval before it gets a branch.
+- Where refresh tokens are stored (a table such as `adm.sys_user_refresh_token`, or elsewhere).
 
 ## Core tables (creation order)
 
@@ -156,12 +202,13 @@ Seed roles: 1 CEO (`is_admin`), 2 Branch manager, 3 Teacher (`is_default`). Role
 | 2 | `cmn.enum_state` + `_translate` | Active / Passive |
 | 3 | `cmn.enum_status` + `_translate` | Document status |
 | 4 | `cmn.sys_table` | Registry of all tables; `table_id` points here |
-| 5 | `adm.info_branch` | Branch = tenant |
-| 6 | `adm.sys_user`, `adm.sys_user_branch` | Users and the branches they may access |
-| 7 | `adm.sys_permission_group` → `sys_permission` (+ `_translate`) | Permissions: group → permission |
-| 8 | `adm.sys_role` (+ `_translate`), `sys_role_permission`, `sys_user_role` | Roles |
-| 9 | `cmn.sys_document_change_log` | Document status history: who, when, from which IP (AI content approval shows up here too) |
-| 10 | `cmn.sys_app_error` | Unhandled (500) errors |
+| 5 | `adm.enum_user_type` + `_translate` | Staff / Teacher / Student |
+| 6 | `adm.info_branch` | Branch = tenant |
+| 7 | `adm.sys_user`, `adm.sys_user_branch` | Accounts (staff, teachers, students) and the branches they may access |
+| 8 | `adm.sys_permission_group` → `sys_permission` (+ `_translate`) | Permissions: group → permission |
+| 9 | `adm.sys_role` (+ `_translate`), `sys_role_permission`, `sys_user_role` | Roles, each bound to a user type |
+| 10 | `cmn.sys_document_change_log` | Document status history: who, when, from which IP (AI content approval shows up here too) |
+| 11 | `cmn.sys_app_error` | Unhandled (500) errors with their input and output |
 
 The status history links to a document through the `table_id` + `doc_id` pair, not an FK, so one table serves every document type.
 
@@ -170,7 +217,7 @@ The status history links to a document through the `table_id` + `doc_id` pair, n
 | UzASBO table | Anjeer replacement |
 |---|---|
 | `INFO_REGION`, `INFO_DISTRICT` | `info_branch.address` text |
-| `SYS_APP_MESSAGE` (message catalog) | The API returns an error code (`Students.NotFound`); the text in 3 languages lives in Angular i18n files |
+| `SYS_APP_MESSAGE` (message catalog) | The API returns an error code (`Students.NotFound`); the text in 4 languages lives in Angular i18n files |
 | `SYS_PERMISSION_SUB_GROUP` | Two levels: group → permission |
 | `SYS_NUMBER_TEMPLATE` | No official document numbers needed; use `doc_number` if required |
 | `SYS_INFO_CHANGE_LOG`, `SYS_HL_CHANGE_LOG` | Audit columns (`created_by`, `last_modified_by`) |
@@ -178,21 +225,34 @@ The status history links to a document through the `table_id` + `doc_id` pair, n
 
 ## Application errors (`cmn.sys_app_error`)
 
-Every unhandled exception — a 500 response — is written to the database as one row.
+Every unhandled exception — a 500 response — is written to the database as one row, together with **what came in (input)** and **what went out (output)**, so a developer can see which input produced which error and replay it.
 
 | Column | What |
 |---|---|
 | `trace_id` | `Activity.Current.TraceId`. Returned to the client as `ProblemDetails.extensions.traceId`; when a user reports it, the error is found by it |
+| `request_method`, `request_path`, `endpoint` | `POST`, `/api/students/42`, and the route template `POST api/students/{id}` — the template groups the same error across different ids |
+| **Input:** `request_query` | Query string, sensitive values masked |
+| **Input:** `request_headers` | `jsonb`, an allow-list only: `Content-Type`, `Accept-Language`, `X-Correlation-Id`, client version. Never `Authorization` or `Cookie` |
+| **Input:** `request_body`, `request_body_size` | Body with sensitive fields masked, cut at 32 KB; `request_body_size` is the original size. For a background job or message consumer: its payload |
+| **Output:** `response_body` | What the client received (the ProblemDetails JSON) |
 | `exception_type`, `message`, `stack_trace`, `inner_exception` | Exception details |
-| `request_method`, `request_path` | Path only. **Query string and body are not stored**: they may contain children's personal data |
 | `user_id`, `branch_id`, `ip_address`, `user_agent` | Who and from where |
 | `source`, `environment`, `machine_name` | Which service and environment |
 | `is_resolved`, `resolved_at`, `resolved_by`, `resolution_note` | Whether the error has been reviewed |
 
+`request_body` is `text`, not `jsonb`: the body that caused the error may be invalid JSON, and it must still be stored exactly as it came. Query it with `request_body::jsonb ->> 'groupId'` when it is valid.
+
+**Masking (PII).** The roadmap rule (week 10) is that a student's name, birth date and parent phone never land in logs. Input is therefore masked **before** it is stored:
+- One list of sensitive field names in code (`SensitiveFields`), compared case-insensitively at any depth of the JSON: `password`, `newPassword`, `token`, `accessToken`, `refreshToken`, `code` (SMS), `fullName`, `firstName`, `lastName`, `birthDate`, `phone`, `phoneNumber`, `parentPhone`, `email`. The value becomes `"***"`; the key stays, so the shape of the input is still visible.
+- IDs, dates, enums and numbers stay as they are — they are what is needed to reproduce the error.
+- `multipart/form-data` (file uploads) is not stored; only a summary such as `[multipart: 2 files, 1.2 MB]`.
+- Masking cannot catch free text (a comment that contains a child's name). Reading this table is a permission of its own (`AppErrors.View`), given only to developers.
+
 How it is written:
-- An `IExceptionHandler` (`AddExceptionHandler`) catches the exception, puts a record into a `Channel<AppError>` and returns the response immediately.
+- A small middleware calls `Request.EnableBuffering()` for API requests, so the body can be read again after the endpoint has consumed it.
+- An `IExceptionHandler` (`AddExceptionHandler`) catches the exception, builds the ProblemDetails response, masks the input, puts a record into a `Channel<AppError>` and returns the response immediately.
 - A `BackgroundService` saves the records with a **separate** `DbContext`, because the main request's transaction may already be broken.
-- Errors must not be lost if the database is down, so they are always written to Serilog and Application Insights as well. The database is an extra, easy-to-query copy.
+- Errors must not be lost if the database is down, so they are always written to Serilog and Application Insights as well (without the body). The database is an extra, easy-to-query copy.
 - Old records (for example, older than 90 days) are cleaned up by a background job.
 
 ## Proposed domain tables (week 3 decision)
@@ -202,11 +262,11 @@ Designing the domain is your decision in week 3. The table below is only a propo
 | Roadmap entity | Table | Why |
 |---|---|---|
 | `Branch` | `adm.info_branch` | Tenant, a list shared by all branches |
-| `User` | `adm.sys_user` | System table |
-| `Student` | `edu.hl_student` | Owned by a branch. PII lives here |
-| `Group` | `edu.hl_group` | Owned by a branch |
-| `Subject` | `edu.info_subject` + `_translate` | Global, 3 languages |
-| `Topic` | `edu.info_topic` + `_translate` (`path ltree`) | Global taxonomy, 3 languages |
+| `User` | `adm.sys_user` | System table: staff, teachers and students who can sign in |
+| `Student` | `edu.hl_student` (`user_id` → `adm.sys_user`, nullable, unique) | Owned by a branch. PII lives here. The account link is optional |
+| `Group` | `edu.hl_group` (`teacher_id` → `adm.sys_user`) | Owned by a branch |
+| `Subject` | `edu.info_subject` + `_translate` | Global, 4 languages |
+| `Topic` | `edu.info_topic` + `_translate` (`path ltree`) | Global taxonomy, 4 languages |
 | `Question` | `edu.info_question` + `_translate` | Global question bank |
 | `Assignment` | `edu.doc_assignment` + `edu.doc_assignment_table` (students) | Has a workflow: created → sent → completed |
 | `AssignmentResult` | `edu.doc_assignment_result` + `_table` (answers) | Document, `owner_id` → assignment |
@@ -226,7 +286,7 @@ Designing the domain is your decision in week 3. The table below is only a propo
 ```sql
 -- table count per schema
 select table_schema, count(*) from information_schema.tables
-where table_schema in ('cmn', 'adm', 'edu') group by 1 order by 1;   -- reference: cmn 8, adm 11
+where table_schema in ('cmn', 'adm', 'edu') group by 1 order by 1;   -- reference: cmn 8, adm 13
 
 -- tables missing from the registry
 select t.table_schema, t.table_name
