@@ -14,3 +14,9 @@
   When the user names an issue, read it and its sub-issues with `gh issue view <N>` first.
 - Reference the issue in commits (`... (closes #N)` for a finished task sub-issue) and use
   `Closes #N` for the day issue in the PR description.
+
+## Database
+- PostgreSQL only. Conventions (prefixes enum_/info_/hl_/doc_/sys_/_translate, audit columns,
+  branch_id tenant, naming pk_/fk_/uc_/ck_/ix_, no cascade deletes, 3 languages uz/ru/en):
+  docs/database/README.md. Core schema: docs/database/001_core_schema.sql.
+- Permissions are declared in code (PermissionCode) and synced to adm.sys_permission — never inserted by SQL.
