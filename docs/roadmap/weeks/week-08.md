@@ -141,9 +141,9 @@ DELETE /api/v1/materials/{id}
 - [ ] The Angular client is generated from OpenAPI (not hand-written)
 - [ ] **Search quality is measured**: 20 real queries, how many succeeded — this number gets compared again in week 23
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | **The entire Angular app** — 7 screens, services, guards, interceptors, styling. On the backend: the upload handler, parsers, migrations. | **The API contract** — endpoints, DTOs, status codes, the pagination shape. And **measuring the baseline search quality** — without this number you can't prove week 23's improvement. |
 

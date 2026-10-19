@@ -139,9 +139,9 @@ GET  /api/v1/ai/traces/{traceId}         agent steps
 - [ ] The agent trace is fully visible in the UI
 - [ ] The cost of a single agent run is measured
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | Semantic Kernel plugin registration, approval infrastructure, an agent-trace display component, tests. | **Agent termination logic** — max iterations, loop detection, cost limit. **The approval UI** — a teacher reviews, edits, and approves the proposal; week 16's reactive forms in practice. And the pedagogical decision about sheet structure — made with teachers. |
 

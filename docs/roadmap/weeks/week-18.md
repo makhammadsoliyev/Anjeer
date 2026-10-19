@@ -99,9 +99,9 @@ Uzbek-language test:
 - [ ] 429 and content-filter errors are handled correctly
 - [ ] **Monthly cost estimate calculated** and in the README
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | Console lab structure, SDK wiring, formatting results into tables, the cost calculator. | **Experimenting with parameters** — temperature and context-window limits need to be felt firsthand. And the **model choice**: which task gets which model, and the cost/quality trade-off. |
 

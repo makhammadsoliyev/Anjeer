@@ -83,9 +83,9 @@ Every change is tested in isolation, then the metric is remeasured. Changing two
 - [ ] Teachers confirm the quality improved
 - [ ] The CI quality gate is updated to the new value
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | Experiment infrastructure, query-rewriting implementation, benchmark automation, formatting results into tables. | **The hypothesis for which experiment to try** — that comes from the failure analysis. And the **keep/reject decision**: is a 0.02 improvement worth the added complexity. |
 

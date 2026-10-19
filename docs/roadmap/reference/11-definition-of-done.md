@@ -62,7 +62,7 @@ Minimum bar:
 - [ ] Every AI decision is justified: why this top-K, this threshold, this prompt
 - [ ] Anything you couldn't explain has been rewritten or removed
 - [ ] `CLAUDE.md` is updated with this week's new rules
-- [ ] The Superpowers design doc and plan are in the repo (`docs/`), with reasons for each decision
+- [ ] `specs/week-NN/` (spec, plan, tasks) is in the repo, with the reason for each decision; `/speckit-converge` reported **Converged**
 - [ ] The weekly kata is done — one core piece rewritten without Claude
 
 ## 11.8 Documentation

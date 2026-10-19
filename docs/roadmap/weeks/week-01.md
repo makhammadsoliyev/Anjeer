@@ -116,7 +116,7 @@ Anjeer.sln
 1. Project dependencies are correct: `Domain` depends on nothing
 1. `TreatWarningsAsErrors` is on and the build is clean
 1. Central Package Management works — versions live in one place
-1. `CLAUDE.md` created
+1. `CLAUDE.md` written and the Spec Kit constitution (`.specify/memory/constitution.md`) reviewed
 1. `.claude/skills/csharp-expert/`, `.editorconfig` and `Directory.Build.props` (EnforceCodeStyleInBuild) added — [section 2.9](../reference/02-working-with-claude-code.md#29-project-skills); templates in [templates/](../templates/)
 1. At least 3 small samples exercising C# 14 features
 
@@ -128,11 +128,11 @@ Anjeer.sln
 - [ ] `dotnet test` runs
 - [ ] README documents what .NET 10 / C# 14 features are used and why
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
-| Solution and project files, `Directory.Build.props`, `.editorconfig`, starter test projects. | **Write `CLAUDE.md` yourself** — these are your project's rules, not something to generate. And decide **when C# 14 features should NOT be used** yourself. |
+| Solution and project files, `Directory.Build.props`, `.editorconfig`, starter test projects. | **Write `CLAUDE.md` yourself** and **review the constitution** — explain every principle in `.specify/memory/constitution.md` and change the ones you disagree with (`/speckit-constitution`). These are your project's rules, not something to accept unread. And decide **when C# 14 features should NOT be used** yourself. |
 
 **Git commit:** `chore: solution skeleton on .NET 10 with C# 14`
 

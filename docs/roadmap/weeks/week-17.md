@@ -82,9 +82,9 @@ ng generate @angular/core:signal-input-migration
 - [ ] You can follow the flow in unfamiliar NgRx code
 - [ ] **Phase explain-back:** you can explain the whole frontend without Claude
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | **Deliberately generating older-style code** (for the exercise), running the schematics. | **Reading and explaining older code** — exactly what "read existing code" means in a job posting. And the ADR: is NgRx needed or not. |
 

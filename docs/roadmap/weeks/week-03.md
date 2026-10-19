@@ -157,9 +157,9 @@ data/
 - [ ] Integration tests pass against Testcontainers
 - [ ] The taxonomy is documented — how to add a new topic
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | Entity classes, EF configuration, migrations, the seed loader script, Testcontainers setup. | **The topic tree itself** — this is the center's methodological knowledge, not something to generate. You build it together with teachers. And **aggregate boundaries**: what lives inside `Group`, what doesn't. |
 

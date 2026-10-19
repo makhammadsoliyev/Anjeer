@@ -125,9 +125,9 @@ src/Anjeer.Infrastructure/
 - [ ] 5+ integration tests
 - [ ] At least one query analyzed with `EXPLAIN` and documented in the README
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | EF configuration classes, migrations, repository boilerplate, Testcontainers fixture, seed data. | **Which queries use EF Core vs. Dapper** — and write the window-function SQL yourself; Claude Code will often reach for a subquery by default, which breaks the project rule. |
 

@@ -1,38 +1,38 @@
 # 2. Working with Claude Code
 
-On this project Claude Code runs **with the Superpowers plugin in full mode** — on both tracks. The agent writes nearly all of the code; your job is to design, approve, and understand. This section defines how to do that role well.
+On this project Claude Code runs **with GitHub Spec Kit** (spec-driven development) — on both tracks. The agent writes nearly all of the code; your job is to specify, design, approve, and understand. This section defines how to do that role well.
 
 ## 2.1 The core risk
 
 > **The core risk — becoming a rubber stamp**
 >
-> With Superpowers in full mode, the agent writes nearly all the code. That buys speed, but it creates a new risk: saying "yes" to everything and approving plans without reading them. Anjeer will work — but you won't be able to answer "why does re-ranking matter?" in an interview.
-> The role asks you to **design AI systems**. With Superpowers, that skill forms in the brainstorming and review stages — if you take them seriously.
+> With Spec Kit, the agent writes nearly all the code. That buys speed, but it creates a new risk: saying "yes" to everything and approving specs and plans without reading them. Anjeer will work — but you won't be able to answer "why does re-ranking matter?" in an interview.
+> The role asks you to **design AI systems**. With Spec Kit, that skill forms in the clarify, plan and review stages — if you take them seriously.
 
 ## 2.2 Where the line sits
 
 The boundary is track-specific and explicit:
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | All implementation: backend, Angular, AI integration | **Domain model** and the topic taxonomy |
 | Tests (TDD), refactoring | **API contract** — endpoints, DTOs, status codes |
 | Migrations, Dockerfiles, CI, deploy scripts | **System prompt** text and strategy |
 | README, docs, OpenAPI annotations | **Tool** `[Description]` text — and which tools shouldn't exist |
 | First-pass code review | **RAG parameters**: chunk size, top-K, threshold, RRF |
-| Debugging (`systematic-debugging`) | **Agent logic**: termination, loop detection, cost limit |
-| Git worktrees and branch management | **Security**: RBAC, approval, PII; golden dataset and red-team attacks |
+| Debugging | **Agent logic**: termination, loop detection, cost limit |
+| Specs, plans and task lists (`specs/week-NN/`) | **Security**: RBAC, approval, PII; golden dataset and red-team attacks |
 
-A simple test: **if an interviewer would ask about it, you make the decision and can explain it.** Superpowers writes the code; design, acceptance, and explanation are yours.
+A simple test: **if an interviewer would ask about it, you make the decision and can explain it.** Claude Code writes the code; design decisions, constitution amendments, acceptance, and explanation are yours.
 
 ## 2.3 The three-day rhythm
 
-| Day | Superpowers | What you do |
+| Day | Claude Code | What you do |
 |---|---|---|
 | **Day 1 — Learn** | Teacher only: "don't write code, just explain" | Learn the concept, free resources, have it quiz you |
-| **Day 2 — Build** | `brainstorming` + `writing-plans` | Make and justify the design decisions, read and approve the plan |
-| **Day 3 — Project** | `subagent-driven-development` + code review | Read the tests and the review, explain-back, kata |
-| **Delivery track** | Autonomous mode, long sessions | Design and final check |
+| **Day 2 — Build** | Teacher and pair: runs and breaks the samples with you | Make the design decisions you will feed into tomorrow's `/speckit-plan` |
+| **Day 3 — Project** | `/speckit-specify` → `clarify` → `plan` → `tasks` → `analyze` → `implement` → `converge` | Answer clarify, give the plan decisions, read the tests and the review, explain-back, kata |
+| **Delivery track** | The same flow, larger slices | Spec and final check |
 
 ## 2.4 CLAUDE.md — project memory
 
@@ -133,60 +133,67 @@ After every weekly project. Part of Definition of Done:
 
 ## 2.7 What NOT to do
 
-- **Answering brainstorming with "you decide"** — this is where most of the learning gets lost
-- **Saying "go" without reading the plan**
+- **Answering `/speckit-clarify` with "you decide"**, or running `/speckit-plan` without your own decisions — this is where most of the learning gets lost
+- **Running `/speckit-implement` without reading `plan.md` and `tasks.md`**
 - **Accepting tests without reading them** — if you don't know what a test checks, you don't know the code works
 - **Merging without an explain-back**
 - **Skipping the kata** — there's no agent in a live-coding interview
 - **Forgetting to update `CLAUDE.md`** — stale rules produce wrong code
 
-## 2.8 Superpowers — full mode
+## 2.8 Spec Kit — spec-driven development
 
-**Superpowers** (`obra/superpowers`) is a skills-based development methodology for Claude Code. On this project it's fully on for both tracks: brainstorming → git worktree → plan → subagent-driven development (with TDD) → code review → finishing the branch.
+**Spec Kit** ([`github/spec-kit`](https://github.com/github/spec-kit)) turns a feature description into a specification, a technical plan and a task list, then implements against them. Each step writes a Markdown file you can read and review: the spec says **what and why**, the plan says **how**, the tasks say **in what order**. On this project it is the only workflow tool, on both tracks.
 
-**Installation:**
+**Installation** (once per computer; the repository is already initialized):
 
-```bash
-/plugin install superpowers@claude-plugins-official
+```powershell
+python -m pip install --user uv
+uv tool install specify-cli==1.2.1          # add --system-certs behind a TLS-inspection proxy
+specify version
 ```
 
-Your role changes: **not the person who writes the code — the person who designs and accepts it.** Learning now happens at five checkpoints:
+The repo holds what `specify init --here --integration claude --script ps --integration-options="--no-model-invocation"` created: `.specify/` (templates, PowerShell scripts, the constitution) and the `/speckit-*` skills in `.claude/skills/`. The skills run **only when you type them** — Claude never starts one on its own. Superpowers is turned off for this repository in `.claude/settings.json`.
 
-| Stage | What Superpowers does | What you do — the learning happens here |
+**Once per project — the constitution.** `.specify/memory/constitution.md` holds the non-negotiable principles every plan is checked against: architecture, test-first, branch isolation, student privacy, data rules, AI rules, clean build. Version 1.0.0 is already in the repo, drafted only from rules the roadmap fixes (section 1.7, the `CLAUDE.md` template in 2.4, the Definition of Done, `docs/database/`). In week 1 (W01.3) you **review** it: explain every principle aloud and change any you disagree with through `/speckit-constitution`. It is amended when a week adds a rule — architecture in week 5, the role matrix and 404 vs. 403 in week 6, tool design in week 21, RAG parameters in week 24 — and those decisions stay yours. `CLAUDE.md` keeps the session-level instructions; the constitution keeps the principles.
+
+**Every weekly project — the flow and your checkpoints:**
+
+| Step | What Spec Kit does | What you do — the learning happens here |
 |---|---|---|
-| `brainstorming` | Asks questions, proposes alternatives, presents the design in chunks | Give **your own decision** on every question, and justify it. This week's interview questions live right here |
-| `writing-plans` | Breaks work into 2–5 minute tasks, with file paths and code | Read the whole plan; have unclear tasks explained or changed; then "go" |
-| `subagent-driven-development` | Executes each task with TDD, two-stage review | Read every test: what's checked, and what isn't |
-| `requesting-code-review` | Reports issues by severity | Explain each critical issue yourself first, then have it fixed |
-| `finishing-a-development-branch` | Merge / PR / keep options | No merge until you pass the explain-back |
+| `/speckit-specify` | Writes `specs/week-NN/spec.md` from the issue: user stories, requirements, success criteria | Read it: is it the issue's scope — nothing more, nothing less? |
+| `/speckit-clarify` | Asks up to 5 targeted questions and writes the answers into the spec | Give **your own answer** to every question and justify it. This week's interview questions live right here |
+| `/speckit-plan` | Writes `plan.md` (+ data model, contracts) and checks it against the constitution | Put **your design decisions** — the right column of the week's table — into the prompt, with the reason and the rejected alternative |
+| `/speckit-tasks` + `/speckit-analyze` | Breaks the plan into ordered tasks; `analyze` reports gaps and contradictions (read-only) | Read `tasks.md` in full; every task maps to a sub-issue; a failing test comes before each implementation task |
+| `/speckit-implement` | Executes the tasks — run it **one sub-issue at a time** | Read every test: what's checked, and what isn't. Commit with `(closes #N)` |
+| `/speckit-converge` | Compares the code with spec, plan and tasks; appends missing tasks | Repeat implement → converge until it reports **Converged** |
+| Review + PR | `/anjeer-review` (from week 6), CI, Claude's PR review | Explain each critical issue yourself first, then have it fixed. No merge until you pass the explain-back |
 
-**Rules to add to `CLAUDE.md`:**
+**TDD is not built in.** Spec Kit generates test tasks only when asked, so the rule lives in `CLAUDE.md` and in your constitution: a test that fails without the change comes first, for every task.
 
-```csharp
-## Working with Superpowers
-- During brainstorming, NEVER choose these yourself — ask the user
-  and present the options with trade-offs:
-  domain model and taxonomy, API contract, system prompt text,
-  tool [Description] text, RAG parameters (chunk size, top-K,
-  threshold, RRF k), agent termination, RBAC and PII decisions,
-  golden dataset and red-team payloads.
-- In the design doc, record "why" and the rejected alternative
-  for every decision.
-- In every plan task, add a short note on which decision it
-  implements.
-- Tests that check AI responses mock IChatClient; quality is
-  measured with the evaluation harness.
+**Rules in `CLAUDE.md`** (already there; keep them when you rewrite the file in week 1):
+
+```text
+## Spec Kit
+- Run /speckit-* skills only when the user invokes them.
+- Specs live in specs/week-NN/ (SPECIFY_FEATURE_DIRECTORY=specs/week-NN).
+- The decisions in the right column of the week's table are the user's. If the
+  /speckit-plan input is missing one, stop and ask with the options and trade-offs.
+- TDD: /speckit-tasks puts a failing-test task before every implementation task.
+- Every task in tasks.md names its sub-issue (e.g. [W05.3.2]); implement one
+  sub-issue per run and commit with (closes #N).
+- The GitHub issue is the source of truth for scope; if spec.md disagrees, ask.
+- Change the constitution only when the user asks; propose amendments instead.
 ```
 
 **How to read the weekly tables**
 
-In every week's "Claude Code + Superpowers" table, the left column is what Superpowers does and the right column holds your decisions. Wherever the right column says "yourself," read it as: **you decide it in brainstorming, have it written into the design doc, verify it in review, and explain it in the explain-back.**
+In every week's "Claude Code + Spec Kit" table, the left column is what Claude Code does and the right column holds your decisions. Wherever the right column says "yourself," read it as: **you put it into `/speckit-clarify` or `/speckit-plan`, it ends up in `spec.md` or `plan.md`, you verify it in review, and you explain it in the explain-back.**
 
 Three things stay manual regardless, because no agent knows them: **the topic taxonomy** (built with teachers), **the golden-dataset questions** (from the real search log), and **the red-team attacks**.
 
 **The weekly kata — keeping your hands sharp**
 
-Full automation carries one real risk: an interview may ask you to code live, with no agent in the room. So every week, one **kata**: take one core piece Superpowers built this week and rewrite it from scratch in a separate worktree, without Claude — 20–30 minutes. Nothing gets committed; the point is muscle memory.
+Full automation carries one real risk: an interview may ask you to code live, with no agent in the room. So every week, one **kata**: take one core piece Claude built this week and rewrite it from scratch in a separate worktree, without Claude — 20–30 minutes. Nothing gets committed; the point is muscle memory.
 
 | Week | Example kata |
 |---|---|
@@ -199,14 +206,15 @@ Full automation carries one real risk: an interview may ask you to code live, wi
 
 **Guardrails**
 
-- **Token cost** — subagent-driven mode is expensive. When your limit gets close, switch to `executing-plans`: one session, one review at the end.
-- **Experiment weeks** (18 — AiLab, 26 — RAG experiments) are work whose outcome isn't known up front. Tell the agent clearly it's a spike; rebuild whatever proves useful with TDD afterwards.
-- **When a session goes wrong** — ask "figure out what went wrong with superpowers in this session": the `diagnosing-superpowers` skill analyzes the session.
-- **Week 27** — also treat Superpowers' own subagent orchestration as a study object: what a real multi-agent system looks like.
+- **Context and token cost** — a whole feature in one `/speckit-implement` run overflows the context. Scope every run to one sub-issue (`/speckit-implement only the tasks for W05.3.2`) and verify before the next.
+- **Specs age** — the spec in `specs/week-NN/` is a record of that week. When a later week changes the behavior, the new week's spec describes the change; don't rewrite old specs.
+- **Experiment weeks** (18 — AiLab, 26 — RAG experiments) are work whose outcome isn't known up front. Skip the full flow: tell the agent clearly it's a spike; rebuild whatever proves useful through the Spec Kit flow with TDD afterwards.
+- **Small fixes** don't need a spec — fix them directly with a test.
+- **Week 27** — also treat Claude Code's own agent loop as a study object: what a real multi-agent system looks like.
 
 ## 2.9 Project skills
 
-Superpowers drives the **process** (plan → TDD → review); the `csharp-expert` skill drives the **style** of the C# Claude writes: C# 14 features, primary constructors, collection expressions, async rules. Architecture rules (Clean Architecture, controllers, `branch_id`, window functions) stay in `CLAUDE.md` — the skill is about language and style only.
+Spec Kit drives the **process** (spec → plan → tasks → implement); the `csharp-expert` skill drives the **style** of the C# Claude writes: C# 14 features, primary constructors, collection expressions, async rules. Architecture rules (Clean Architecture, controllers, `branch_id`, window functions) stay in `CLAUDE.md` — the skill is about language and style only.
 
 **Where it lives:**
 
@@ -223,7 +231,7 @@ Templates: [templates/](../templates/) — the skills are under `templates/skill
 
 - **Trigger** — in every session Claude Code sees only the skill's `description` line. When a task writes, refactors or reviews `.cs` files, the full `SKILL.md` loads (~1.5k tokens).
 - **Two layers** — the skill guides Claude; `.editorconfig` + `dotnet format --verify-no-changes` enforce in CI. The skill is guidance, the formatter is the guarantee — and it checks your own code too.
-- **With Superpowers** — subagents see project skills too. At `requesting-code-review`, ask it to "also check against the csharp-expert rules".
+- **With Spec Kit** — `/speckit-implement` runs in your session, so `csharp-expert` loads as soon as it writes `.cs` files. In review, ask it to "also check against the csharp-expert rules".
 
 **What changed from the original skill:**
 
@@ -241,8 +249,8 @@ Templates: [templates/](../templates/) — the skills are under `templates/skill
 |---|---|---|
 | `csharp-expert` | 1 | Automatic — whenever `.cs` files are written or reviewed |
 | `anjeer-add-entity` | 5 | Automatic — "add an entity". Asks you for the isolation class and PII |
-| `anjeer-add-feature` | 5 | **Manual only:** `/anjeer-add-feature` — so it never bypasses the Superpowers flow |
-| `anjeer-review` | 6 | Automatic — when a review is requested and at the Superpowers review step; works with `anjeer-security-reviewer` |
+| `anjeer-add-feature` | 5 | **Manual only:** `/anjeer-add-feature` — so it never bypasses the Spec Kit flow |
+| `anjeer-review` | 6 | Automatic — when a review is requested, and before the PR after `/speckit-converge`; works with `anjeer-security-reviewer` |
 
 Templates: [templates/skills/](../templates/skills/). `add-entity` and `add-feature` wait until week 5 — they rely on the architecture decisions in `CLAUDE.md` (dispatcher, Result type), which you make in week 5.
 
@@ -268,7 +276,7 @@ In weeks 8–11 the HTML/CSS block is its own `W08.2b` sub-issue. About 330 issu
 |---|---|---|
 | Wednesday | Evening, 2–3 hours | **Learn** — topics, resources, explain-back |
 | Saturday | Full session | **Build** (+ the HTML/CSS block in weeks 8–11) |
-| Sunday | Full session | **Project** — with Superpowers; the weekly kata at the end |
+| Sunday | Full session | **Project** — with Spec Kit; the weekly kata at the end |
 
 **One-time setup (before 11 October):**
 
@@ -288,10 +296,10 @@ python docs/roadmap/tools/roadmap_issues.py --weeks 1-6             # phase 1
 **The daily loop:**
 
 - **Learn / Build** — open the issue (`gh issue view N`), tick the checkboxes, explain each topic aloud, short notes in `notes/week-NN.md` → close the issue.
-- **Project** — `git switch -c week-NN/project` → Claude Code: "Read issue #N and its sub-issues with `gh issue view`, then start brainstorming" → each sub-issue closes from its commit: `feat: ... (closes #M)`.
+- **Project** — `git switch -c week-NN/project` → `/speckit-specify SPECIFY_FEATURE_DIRECTORY=specs/week-NN Write the spec for issue #N and its sub-issues (read them with gh issue view)` → clarify → plan (your decisions) → tasks → analyze → implement one sub-issue at a time; each closes from its commit: `feat: ... (closes #M)` → converge.
 - **PR** — `Closes #N` → `/anjeer-review` (from week 6) → explain-back → merge.
 - **End of week** — kata, move `CURRENT.md` to the next week → close the week issue.
-- **Every issue has a "Steps — date" section** — an ordered checklist of what to do that day. The project issue has 7 steps: branch → brainstorming (with your list of decisions) → design doc and plan → the sub-issues **in order** → acceptance criteria → PR → kata. Each sub-issue states its place, e.g. "step 4.2, after 4.1".
+- **Every issue has a "Steps — date" section** — an ordered checklist of what to do that day. The project issue has 7 steps: branch → spec and clarify → plan and tasks (with your list of decisions) → the sub-issues **in order** → converge and acceptance criteria → PR → kata. Each sub-issue states its place, e.g. "step 4.2, after 4.1".
 
 **Calendar (start: Monday, 12 October 2026):**
 

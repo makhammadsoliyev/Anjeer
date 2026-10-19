@@ -112,9 +112,9 @@ Play Grid Garden. Then open the dashboard at phone size in DevTools device mode:
 - [ ] A feature flag turns a feature off and on
 - [ ] **A test proves no student name reaches the logs**
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | Key Vault and App Configuration wiring, OpenTelemetry registration, Serilog setup, updating the deploy scripts. | **The RBAC matrix**: which role gets which resource. And **what gets logged, what doesn't** — a privacy decision that matters given the data involved. |
 

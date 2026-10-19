@@ -163,9 +163,9 @@ smoke:      health + one AI request
 - [ ] README is complete, demo video ready
 - [ ] **An explain-back pass was done for the whole system**
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | GitHub Actions workflow, docker build steps, README structure, the diagram text, the demo script. | **The known-limitations list** — what doesn't work, what needs improvement. And the **final explain-back**: can you explain the whole platform without Claude Code? If not, go back to that part. |
 

@@ -2,7 +2,7 @@
 
 Every week follows the same rhythm: **Monday — prep, Wednesday — Learn, Saturday — Build, Sunday — Project**.
 This page is a short checklist of what to do each day. Full methodology:
-[reference/02-working-with-claude-code.md](reference/02-working-with-claude-code.md) (2.6 explain-back, 2.8 Superpowers, 2.10 issues).
+[reference/02-working-with-claude-code.md](reference/02-working-with-claude-code.md) (2.6 explain-back, 2.8 Spec Kit, 2.10 issues).
 
 | Day | Issue | Time | Outcome |
 |---|---|---|---|
@@ -55,17 +55,22 @@ Give me 3 interview questions on this topic and grade my answers.
 
 ## Sunday — Project (7 steps)
 
-Follow the "Steps" checklist inside the issue (`WNN.3`). In short:
+Follow the "Steps" checklist inside the issue (`WNN.3`). The project runs on Spec Kit; every artifact lands in
+`specs/week-NN/`. In short:
 
 | # | Step | How |
 |---|---|---|
 | 1 | Branch | `git switch -c week-NN/project` → **In Progress** on the Board |
-| 2 | Brainstorming | Claude Code: *"Read issue #N and its sub-issues with `gh issue view`, start brainstorming"*. **You** make the **"Answer these yourself"** decisions from the issue |
-| 3 | Design doc + plan | Saved to `docs/plans/week-NN/`. Read the plan in full, ask about any unclear task, then say "go" |
-| 4 | Tasks | Sub-issues **in order**. Each one: test first (TDD) → code → commit `feat: ... (closes #M)` |
-| 5 | Acceptance criteria | Everything in the issue is green. `dotnet build` + `dotnet test` pass locally |
+| 2 | Spec | `/speckit-specify SPECIFY_FEATURE_DIRECTORY=specs/week-NN Write the spec for issue #N and its sub-issues (read them with gh issue view)` → read `spec.md` → `/speckit-clarify`: **you** answer every question |
+| 3 | Plan + tasks | `/speckit-plan <your "Answer these yourself" decisions, each with the reason>` → `/speckit-tasks` → `/speckit-analyze`. Read `plan.md` and `tasks.md` in full before going on |
+| 4 | Tasks | Sub-issues **in order**: `/speckit-implement only the tasks for WNN.3.M` → test first (TDD) → code → commit `feat: ... (closes #M)` |
+| 5 | Converge + acceptance | `/speckit-converge` until **Converged**. Everything in the issue is green; `dotnet build` + `dotnet test` pass locally |
 | 6 | PR | Draft PR → CI green → **Ready for review** → **In Review** on the Board |
 | 7 | Kata | 20–30 minutes, without Claude — write the core of this week from scratch, do not commit |
+
+**Week 1 only — before step 2:** review the constitution (`.specify/memory/constitution.md`, v1.0.0):
+explain every principle aloud, change any you disagree with via `/speckit-constitution <your change>`,
+commit. Weeks 5, 6, 21 and 24 amend it with your decisions.
 
 **The PR step in detail (6):**
 
@@ -84,9 +89,9 @@ gh pr create --draft --title "WNN: <project name>" --body "Closes #<WNN.3 number
 
 ## Rules
 
-- **Give to Claude:** skeletons, boilerplate, test lists, mechanical refactoring, review.
-- **Keep for yourself:** the "Answer these yourself" decisions in the issue, domain and security decisions,
-  business logic in SQL, explain-back, kata.
+- **Give to Claude:** spec and plan drafts, task lists, skeletons, boilerplate, tests, mechanical refactoring, review.
+- **Keep for yourself:** reviewing and amending the constitution, the `/speckit-clarify` answers and the "Answer these yourself"
+  decisions you give `/speckit-plan`, domain and security decisions, business logic in SQL, explain-back, kata.
 - **Falling behind:** unfinished work moves to the next free evening (move `Planned` in the Project).
   Do not start next week's project on top of the old one. If you fall behind two weeks in a row —
   that is what week 11 (BUFFER) is for.

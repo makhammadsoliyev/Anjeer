@@ -131,9 +131,9 @@ Anjeer/
 - [ ] Deployment is repeatable via `deploy.sh`
 - [ ] README includes an architecture diagram and deploy steps
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | Dockerfiles, compose files, `deploy.sh`, nginx configuration — pure boilerplate, fully delegated. | **Region choice** and **scale decisions**: how many minimum replicas, how cold start affects users. And the Azure cost estimate — what it runs per month. |
 

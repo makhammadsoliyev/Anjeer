@@ -1,6 +1,6 @@
 ---
 name: anjeer-add-feature
-description: Scaffold a complete Anjeer vertical slice — command or query, handler, validator, response, controller action and tests. Use ONLY when the user explicitly invokes /anjeer-add-feature; for normal feature work follow the Superpowers flow.
+description: Scaffold a complete Anjeer vertical slice — command or query, handler, validator, response, controller action and tests. Use ONLY when the user explicitly invokes /anjeer-add-feature; for normal feature work follow the Spec Kit flow.
 argument-hint: "<feature description, e.g. \"teacher archives an assignment\">"
 disable-model-invocation: true
 ---

@@ -1,6 +1,6 @@
 ---
 name: anjeer-review
-description: Review pending Anjeer changes against the project's rules — layer boundaries, branch isolation, 404 vs 403, PII and AI safety, SQL rules, slice conventions and test coverage. Use when the user asks to review changes, check conventions or audit a feature before committing, and during the Superpowers code-review step.
+description: Review pending Anjeer changes against the project's rules — layer boundaries, branch isolation, 404 vs 403, PII and AI safety, SQL rules, slice conventions and test coverage. Use when the user asks to review changes, check conventions or audit a feature before committing, and before opening the PR after /speckit-converge.
 argument-hint: "[optional: files or feature to review; defaults to the working-tree diff]"
 ---
 

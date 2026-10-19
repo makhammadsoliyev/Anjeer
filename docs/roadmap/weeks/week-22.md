@@ -113,9 +113,9 @@ Fill this table with your own corpus — these numbers get used in interviews.
 - [ ] The benchmark table is filled in and in the README
 - [ ] Indexing cost is calculated
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | Chunking implementations, the batch embedder, the `Channel` + worker, parsers, status tracking, progress display in Angular. | **Chunk size and overlap** — guided by the benchmark. And the **rule specific to educational material**: what must never be split. That's domain knowledge Claude Code doesn't have. |
 

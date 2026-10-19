@@ -123,9 +123,9 @@ LIMIT @topK;
 - [ ] No chunk from another branch ever surfaces
 - [ ] The Azure AI Search comparison is documented (cost and capability)
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | pgvector migration, EF mapping, wiring the RRF query into code, the benchmark harness, updating the Angular search UI. | **Understanding the RRF math** — why fusion works on rank, what `k=60` means. And **the reasoning behind Azure AI Search vs. pgvector** — a direct interview question. |
 

@@ -90,9 +90,9 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 - [ ] An expired token is invisible to the user
 - [ ] Explain-back: you can explain all 4 flattening operators with examples
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | Search results UI, loading skeletons, empty-state design. | **The RxJS pipeline and the interceptors.** Especially the refresh logic: 5 concurrent 401 responses must trigger only one refresh request. |
 

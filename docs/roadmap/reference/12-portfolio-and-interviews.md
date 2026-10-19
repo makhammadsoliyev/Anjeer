@@ -29,7 +29,7 @@ Anjeer is one repo, but in interviews it becomes four distinct stories:
 - "How do you keep an agent from looping forever?" — iteration limit, loop detection, timeout
 - "What if AI makes a bad decision?" — the approval flow, audit log, feature flags
 - "Why pgvector instead of Azure AI Search?" — cost, existing infrastructure, comparison results
-- "How do you use agentic tools like Claude Code?" — the Superpowers workflow: brainstorming → plan → TDD subagents → review; decisions, acceptance, and explain-back stay with you (2.8)
+- "How do you use agentic tools like Claude Code?" — spec-driven development with GitHub Spec Kit: constitution → spec → clarify → plan → tasks → implement (TDD) → converge → review; constitution amendments, decisions, acceptance, and explain-back stay with you (2.8)
 
 **On Angular:**
 

@@ -1,11 +1,11 @@
 # 6. PHASE 3 — Angular and TypeScript (weeks 12–17)
 
-The MVP is live and the center is using it. Now you take ownership of the Angular frontend Claude Code wrote in week 8: you read it, debug it, and redesign its core flows with Superpowers. This covers the "Angular 18+ and TypeScript" requirement found in many .NET job postings.
+The MVP is live and the center is using it. Now you take ownership of the Angular frontend Claude Code wrote in week 8: you read it, debug it, and redesign its core flows with Spec Kit. This covers the "Angular 18+ and TypeScript" requirement found in many .NET job postings.
 
 > **Phase boundary — not an Angular specialist**
 >
 > The goal: **write features, read existing code, and debug it**. For a backend-heavy full-stack role, that's enough. Animations, SSR, and deep NgRx are out of scope for this phase.
-> Superpowers stays in full mode here too. But two things get stronger: you **read and explain** every component and service Superpowers writes — that's exactly the "read existing code" skill; and the katas come from the frontend, since an Angular live-coding exercise is possible.
+> The Spec Kit flow stays the same here too. But two things get stronger: you **read and explain** every component and service Claude Code writes — that's exactly the "read existing code" skill; and the katas come from the frontend, since an Angular live-coding exercise is possible.
 
 ## Courses: Maximilian Schwarzmüller (Udemy)
 
