@@ -8,10 +8,10 @@ built while preparing for .NET + AI engineering roles. Three days per week — L
 ## How Claude Code uses this folder
 
 - Read [CURRENT.md](CURRENT.md) first, then only the current week's file — not the whole roadmap.
-- A week's **Day 3 — PROJECT** section (functional requirements + acceptance criteria) is the spec
-  for brainstorming.
-- In each week's **Claude Code + Superpowers** table, the right-hand column lists decisions the
-  user makes. Ask for them during brainstorming; never choose them yourself.
+- A week's **Day 3 — PROJECT** section (functional requirements + acceptance criteria) is the source
+  for `/speckit-specify`; the Spec Kit artifacts go to `specs/week-NN/`.
+- In each week's **Claude Code + Spec Kit** table, the right-hand column lists decisions the
+  user makes. The user gives them in `/speckit-clarify` and `/speckit-plan`; never choose them yourself.
 - The rules in [reference/01-about.md](reference/01-about.md) (section 1.7) and
   [reference/02-working-with-claude-code.md](reference/02-working-with-claude-code.md) always apply.
 
@@ -71,7 +71,7 @@ built while preparing for .NET + AI engineering roles. Three days per week — L
 ## Reference
 
 - [1. About the project and the course](reference/01-about.md) — goals, two tracks, the 7 rules
-- [2. Working with Claude Code](reference/02-working-with-claude-code.md) — delegation, explain-back, Superpowers full mode
+- [2. Working with Claude Code](reference/02-working-with-claude-code.md) — delegation, explain-back, Spec Kit (spec-driven development)
 - [3. Domain model](reference/03-domain-model.md) — entities, topic taxonomy (`ltree`), mastery, roles
 - [10. Overview table](reference/10-overview.md)
 - [11. Definition of Done](reference/11-definition-of-done.md)

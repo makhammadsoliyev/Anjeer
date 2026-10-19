@@ -141,9 +141,9 @@ GET    /api/v1/groups/{id}/weak-topics    group's weak topics
 - [ ] No SQL query uses a self-join
 - [ ] 6+ integration tests
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | CRUD handlers, DTOs, validators, migrations, test scaffolding, a question-import script. | **The snapshot decision** (how to preserve old results after a question edit) and the **mastery formula**. Both get read by AI in weeks 21 and 27 — get them wrong and AI draws the wrong conclusions too. |
 

@@ -150,9 +150,9 @@ src/Anjeer.Infrastructure/Audit/AuditLogger.cs
 - [ ] The audit log records every access to student data
 - [ ] README includes the role matrix
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | The JWT service, controller, claim extensions, test fixtures, and role-based test scaffolding. | **The role matrix itself** and the **404 vs. 403 decision**. Delegating security decisions is the riskiest habit on this project. This week you also write the `anjeer-security-reviewer` subagent, used every week after this. |
 

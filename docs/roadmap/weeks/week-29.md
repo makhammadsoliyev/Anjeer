@@ -102,9 +102,9 @@ Agent              → cost DoS, infinite loop
 - [ ] The threat model is documented
 - [ ] `anjeer-security-reviewer` has reviewed all the AI-related code
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | Defense-layer implementation, test harness, CI integration, rate limiter configuration. | **Think up the attack payloads yourself.** If Claude Code writes both the attacks and the defense, it defends against attacks it already knows about — not a real test. Add attacks specific to a children's context too. |
 

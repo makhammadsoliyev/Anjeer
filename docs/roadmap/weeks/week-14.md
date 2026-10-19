@@ -86,9 +86,9 @@ export class DashboardStore {
 - [ ] Unit tests for the store
 - [ ] Explain-back: you can explain how `OnPush` and signals work together
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | Dashboard layout and styling, card component markup. | **The store design** — what state lives where, what's `computed`. And **the `OnPush` decision** — the single most-asked Angular interview topic. |
 

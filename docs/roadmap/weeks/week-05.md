@@ -107,9 +107,9 @@ src/Anjeer.Application/Features/Groups/
 - [ ] The external API contract is unchanged
 - [ ] README includes an architecture diagram and ADRs (decision records)
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | Handler skeletons, dispatcher registration, folder scaffolding, mechanical refactoring. | **Layer boundaries**: what belongs in `Domain`, what belongs in `Application`. This needs to be yours — interviewers ask about exactly this. This is also the week `CLAUDE.md` gets its architecture rules. |
 

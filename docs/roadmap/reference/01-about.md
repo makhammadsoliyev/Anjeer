@@ -43,7 +43,7 @@ The core requirements of the job posting and which week closes each one:
 | RAG integration | 22–26 | Production RAG over materials + evaluation |
 | Docker and containerization | 9 | Dockerfile, docker-compose, Container Apps |
 | **Angular 18+ and TypeScript** | 12–17 | Taking over the MVP frontend + core screens |
-| **GenAI / agentic coding (Claude Code + Superpowers)** | Every week | Section 2 methodology |
+| **GenAI / agentic coding (Claude Code + Spec Kit)** | Every week | Section 2 methodology |
 | Maintainable, documented code | Every week | Definition of Done + README |
 | Explaining complex ideas clearly | 26, 30 | Evaluation report, architecture document |
 
@@ -58,8 +58,8 @@ Many .NET postings (for example, .NET + Angular full-stack roles) additionally a
 
 | Track | Hours / week | Contents | Your role |
 |---|---|---|---|
-| **Learning** | 4–5 | Roadmap order, new concepts, weekly project | **Designer** — brainstorming decisions, review, explain-back, kata |
-| **Delivery** | 6–8 | Angular UI, CRUD, bugs, user requests | **Acceptor** — Superpowers runs autonomously, you do the final check |
+| **Learning** | 4–5 | Roadmap order, new concepts, weekly project | **Designer** — constitution review, clarify answers and plan decisions, review, explain-back, kata |
+| **Delivery** | 6–8 | Angular UI, CRUD, bugs, user requests | **Acceptor** — Claude Code runs the Spec Kit flow on larger slices, you write the spec input and do the final check |
 
 ~10–12 hours/week total. If that's not realistic, push the question bank later in the MVP and ship only administration + materials first. Decide this **now**, not two months in.
 

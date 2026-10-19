@@ -96,9 +96,9 @@ GetBranchSummary(long branchId, string period)
 - [ ] An unauthenticated request is refused
 - [ ] **A demo is recorded** (for the portfolio)
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | The MCP server skeleton, tool declarations, transport setup, `.mcp.json`, README. | **Which tools get exposed and which don't** — an MCP server faces the outside world, so its surface must stay minimal. No write tool is ever exposed here. |
 

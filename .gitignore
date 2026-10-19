@@ -484,3 +484,6 @@ $RECYCLE.BIN/
 # Anjeer
 roadmap-issues-preview/
 
+
+# Claude Code: personal settings stay local
+.claude/settings.local.json

@@ -78,9 +78,9 @@ Fix one of the buffer week's UX issues yourself with CSS. Then fill in the test-
 - [ ] The search baseline number is recorded
 - [ ] A tech-debt list exists (what to fix later)
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | Bug fixes, query optimization, rewriting error messages, the user guide, Angular UX fixes. | **The decision about what to fix** — that comes from talking to users, not from the code. And the **tech-debt list**: what's now, what's later. |
 

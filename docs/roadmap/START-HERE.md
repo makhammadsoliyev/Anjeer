@@ -3,18 +3,18 @@
 Do these in order. Steps 1–7 are a one-time setup before week 1 (by Sunday 11.10.2026).
 
 > **Windows shortcut:** put `anjeer-setup.bat` next to this zip and run it. It does steps 1–8 below
-> (tools via winget, GitHub login, repository, templates, `CLAUDE.md`, push, Superpowers, phase-1 issues)
+> (tools via winget, GitHub login, repository, templates, `CLAUDE.md`, push, phase-1 issues)
 > **and creates the .NET solution skeleton** from week 1: `Anjeer.sln`, four `src` projects, two test
 > projects, project references and Central Package Management. It is safe to run again.
-> What remains for week 1's project (W01.3): writing `CLAUDE.md`, the architecture test, the C# 14 samples
-> and the README notes.
+> What remains for week 1's project (W01.3): writing `CLAUDE.md`, reviewing the Spec Kit constitution, the
+> architecture test, the C# 14 samples and the README notes. Spec Kit (step 7) is installed separately.
 
 ## Setup (once)
 
 1. **Install** — .NET 10 SDK, Git, GitHub CLI (`gh`), Python 3, Docker Desktop, Claude Code.
    Node.js and Angular CLI can wait until week 8.
 2. **Create the repository** — `anjeer` on GitHub, clone it.
-3. **Unpack this package into the repository root** — you get `docs/roadmap/`, `docs/plans/` and
+3. **Unpack this package into the repository root** — you get `docs/roadmap/` and
    `CLAUDE.roadmap-snippet.md`.
 4. **Copy the week-1 templates:**
    ```bash
@@ -26,7 +26,16 @@ Do these in order. Steps 1–7 are a one-time setup before week 1 (by Sunday 11.
 5. **Start `CLAUDE.md`** — create it with only the contents of `CLAUDE.roadmap-snippet.md`, then delete the
    snippet file. You write the rest of `CLAUDE.md` yourself in week 1.
 6. **Commit and push to `main`** — the issues link to these files on `main`.
-7. **Install Superpowers** — in Claude Code: `/plugin install superpowers@claude-plugins-official`.
+7. **Install Spec Kit** — once per computer:
+   ```powershell
+   python -m pip install --user uv
+   uv tool install specify-cli==1.2.1      # add --system-certs behind a TLS-inspection proxy
+   specify version
+   ```
+   The repository is already initialized (`.specify/`, `/speckit-*` skills in `.claude/skills/`), and
+   Superpowers is turned off for it in `.claude/settings.json`. For a fresh repository:
+   `specify init --here --force --integration claude --script ps --integration-options="--no-model-invocation"`.
+   Details: [section 2.8](reference/02-working-with-claude-code.md#28-spec-kit--spec-driven-development).
 
 ## Issues (once per phase)
 

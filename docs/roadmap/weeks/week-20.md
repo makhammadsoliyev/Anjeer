@@ -137,9 +137,9 @@ tests/Anjeer.AiTests/
 - [ ] Prompt changes are tracked in git history
 - [ ] README documents each prompt's purpose and constraints
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | The `PromptProvider` infrastructure, JSON schema generation, deserialization, retry logic, test harness. | **Every word of every prompt — entirely yours.** That's the whole point of the week. Claude Code can only critique what you've written: "this rule is vague," "this creates a conflict." |
 

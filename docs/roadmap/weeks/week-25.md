@@ -126,9 +126,9 @@ GET  /api/v1/knowledge/evaluate         → golden-dataset results
 - [ ] **Results are tabulated in the README**
 - [ ] The CI quality gate is active
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | Evaluation harness code, metric computation, CI integration, the Angular source-display UI. | **Write the 25-question golden dataset yourself** (or gather it from teachers). If Claude Code writes both the questions and the answers, the model grades itself and the measurement loses its meaning. |
 

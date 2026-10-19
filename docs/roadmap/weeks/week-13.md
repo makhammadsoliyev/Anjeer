@@ -85,9 +85,9 @@ export class WeakTopicsComponent {
 - [ ] The new component uses signals and the new control flow
 - [ ] Explain-back: you can walk through how the app boots, end to end
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | Fixing the bugs with the `systematic-debugging` skill, the new component. | **Pause at every phase:** state your own root-cause hypothesis before the skill does, then compare. `ARCHITECTURE.md` — yours. Kata: find one bug with DevTools, without Claude. |
 
