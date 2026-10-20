@@ -31,6 +31,15 @@
   spec, plan and review. Change it only when the user asks (via /speckit-constitution); if a task
   needs a new principle, propose the amendment instead of applying it.
 
+## Docs
+- Map of the documentation layers: docs/README.md. Decisions that outlive one week are ADRs in
+  docs/adr/ (index in its README); proposals and spikes are RFCs in docs/rfc/. Before /speckit-plan,
+  read the ADRs the week depends on; if a plan makes a new cross-week decision, add an ADR in the
+  same PR instead of burying it in research.md.
+- Terms come from docs/glossary.md; a spec that needs a new term adds it there.
+- docs/architecture/, docs/api/, docs/security/, docs/runbooks/ are placeholders whose README says
+  which week fills them; do not fill them earlier.
+
 ## Language
 - Everything written to GitHub is in English: issues, sub-issues, PR titles and descriptions,
   review and issue comments, commit messages, code comments and docs in the repo.
