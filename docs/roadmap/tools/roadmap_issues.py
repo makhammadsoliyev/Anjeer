@@ -150,13 +150,13 @@ def checkboxes(body: str, label: str) -> str:
 
 
 def your_decisions(body: str) -> str:
-    """Right-hand cell of the 'Claude Code + Superpowers' table: the decisions that stay with the user."""
+    """Right-hand cell of the 'Claude Code + Spec Kit' table: the decisions that stay with the user."""
     lines = body.splitlines()
     for i, line in enumerate(lines):
-        if line.strip() == "**Claude Code + Superpowers:**":
+        if line.strip() == "**Claude Code + Spec Kit:**":
             for row in lines[i + 1:i + 6]:
                 cells = [c.strip() for c in row.strip().strip("|").split("|")]
-                if len(cells) == 2 and not set(cells[0]) <= set("-: ") and "Superpowers does" not in cells[0]:
+                if len(cells) == 2 and not set(cells[0]) <= set("-: ") and "does this" not in cells[0]:
                     return cells[1]
     return ""
 
@@ -284,13 +284,22 @@ def plan_week(w: Week, monday: dt.date, weekday: int, blob: str) -> list[Planned
             body += (
                 f"\n\n## Steps — {when}\n\n"
                 f"- [ ] **1. Branch** — `git switch -c week-{nn}/project`\n"
-                f"- [ ] **2. Brainstorming** — Claude Code: \"Read issue {{{{{k}}}}} and its sub-issues with "
-                "`gh issue view`, then start brainstorming.\" Answer these yourself"
-                + (f": {decisions}\n" if decisions else ".\n") +
-                f"- [ ] **3. Design doc and plan** — saved under `docs/plans/week-{nn}/`; read every plan task before \"go\"\n"
-                "- [ ] **4. Finish the tasks in this order** — each one closes from its commit `feat: ... (closes #N)`:\n"
+                "- [ ] **2. Spec** — "
+                + ("first review the constitution: read `.specify/memory/constitution.md`, explain every "
+                   "principle, change any you disagree with via `/speckit-constitution`; then "
+                   if w.number == 1 else "") +
+                f"`/speckit-specify SPECIFY_FEATURE_DIRECTORY=specs/week-{nn} Write the spec for "
+                f"issue {{{{{k}}}}} and its sub-issues (read them with gh issue view)`, read `spec.md`, then "
+                "`/speckit-clarify` — answer every question yourself\n"
+                "- [ ] **3. Plan and tasks** — `/speckit-plan` with your own decisions and the reason for each"
+                + (f": {decisions}" if decisions else ".") +
+                " Then `/speckit-tasks` (a failing test before every implementation task) and `/speckit-analyze`; "
+                "read `plan.md` and `tasks.md` in full\n"
+                "- [ ] **4. Finish the tasks in this order** — `/speckit-implement` one sub-issue at a time; "
+                "each one closes from its commit `feat: ... (closes #N)`:\n"
                 + (tasks + "\n" if tasks else "") +
-                "- [ ] **5. Acceptance criteria** above all green\n"
+                "- [ ] **5. Converge and acceptance** — `/speckit-converge` until it reports Converged; "
+                "acceptance criteria above all green\n"
                 f"- [ ] **6. PR** — `Closes {{{{{k}}}}}` → `/anjeer-review` (from week 6) → explain-back → merge\n"
                 "- [ ] **7. Kata** — 20–30 min, no Claude (section 2.8)\n\n"
                 "> Not finished on Sunday? Carry the open tasks to the next free evening and move their "

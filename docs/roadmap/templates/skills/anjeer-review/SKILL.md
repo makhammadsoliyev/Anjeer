@@ -1,6 +1,6 @@
 ---
 name: anjeer-review
-description: Review pending Anjeer changes against the project's rules — layer boundaries, branch isolation, 404 vs 403, PII and AI safety, SQL rules, slice conventions and test coverage. Use when the user asks to review changes, check conventions or audit a feature before committing, and during the Superpowers code-review step.
+description: Review pending Anjeer changes against the project's rules — layer boundaries, branch isolation, 404 vs 403, PII and AI safety, SQL rules, slice conventions and test coverage. Use when the user asks to review changes, check conventions or audit a feature before committing, and before opening the PR after /speckit-converge.
 argument-hint: "[optional: files or feature to review; defaults to the working-tree diff]"
 ---
 
@@ -27,7 +27,7 @@ code, run it as well and merge its findings into the report.
 - **PII:** student name, birth date and parent phone never reach an LLM prompt, a log message or a
   telemetry tag. LLM input uses `student_{id}` + topic code + score only.
 - AI-generated content visible to a child is created as `PendingApproval`; only a teacher approves it.
-- No secrets in code or `appsettings*.json` (User Secrets locally, Managed Identity in Azure).
+- No secrets in code or `appsettings*.json` (User Secrets locally, environment variables or SOPS on the server).
 
 ### Blockers — architecture
 - `Domain` references nothing outside itself; `Application` references only `Domain`;

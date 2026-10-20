@@ -113,9 +113,9 @@ src/Anjeer.Api/
 - [ ] `/health/ready` reflects dependency status
 - [ ] Error responses contain no internal detail
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | Controller boilerplate, DTOs, validators, `[ProducesResponseType]` attributes, exception handler, health check registration. | **Filter pipeline order** — why the audit filter runs after authorization. And **resilience policy**: how many retries, on which status codes. |
 

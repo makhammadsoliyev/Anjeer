@@ -95,9 +95,9 @@ export function parseTopicCode(raw: string): TopicCode | null {
 - [ ] The differences table is in the README, in your own words
 - [ ] Explain-back: you can explain structural vs. nominal typing with an example
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | The exercises and utilities with TDD, ESLint and `tsconfig` setup. | **Read every test** and explain what it checks. **The C# ↔ TS differences table** — written by you. Kata: write `parseTopicCode` and `Result<T>` from scratch without Claude. |
 

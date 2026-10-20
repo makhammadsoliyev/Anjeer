@@ -4,7 +4,7 @@ In this phase the center starts really using the system. The delivery track carr
 
 > **Phase goal**
 >
-> By the end of week 9, a teacher can log in, see their group, assign a test, get results, and find a material. That's the MVP — no AI yet, and none needed.
+> By the end of week 9, a teacher can log in, see their group, assign a test, get results, and find a material, on a live Hetzner server. That's the MVP — no AI yet, and none needed. Week 11 then prepares the January pilot: one class, ~300 approved items, parent accounts and the light operations module (`docs/project-overview.md`, section 9A).
 
 ## Weeks in this phase
 

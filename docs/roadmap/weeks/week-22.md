@@ -46,7 +46,7 @@ Semantic search:      FINDS IT
 **Free resources:**
 
 - **[Docs]** [.NET AI — Embeddings](https://learn.microsoft.com/en-us/dotnet/ai/conceptual/embeddings) (learn.microsoft.com)
-- **[Docs]** [Azure AI Search — Chunk large documents](https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-chunk-documents) (learn.microsoft.com)
+- **[Article]** [Chunking strategies for LLM applications](https://www.pinecone.io/learn/chunking-strategies/) (pinecone.io)
 - **[YouTube]** 3Blue1Brown — "Transformers, the tech behind LLMs" — a visual explanation of embeddings
 
 ## Day 3 — PROJECT: Anjeer — chunking and indexing pipeline
@@ -59,7 +59,7 @@ Semantic search:      FINDS IT
 
 | Technology | Purpose |
 |---|---|
-| **Azure OpenAI Embeddings** | Vector generation |
+| **Embedding model** via `IEmbeddingGenerator` (hosted API) | Vector generation |
 | `Microsoft.Extensions.AI` | `IEmbeddingGenerator` |
 | `Microsoft.ML.Tokenizers` | Measuring chunk size |
 | `System.Threading.Channels` | Async queue |
@@ -113,9 +113,9 @@ Fill this table with your own corpus — these numbers get used in interviews.
 - [ ] The benchmark table is filled in and in the README
 - [ ] Indexing cost is calculated
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | Chunking implementations, the batch embedder, the `Channel` + worker, parsers, status tracking, progress display in Angular. | **Chunk size and overlap** — guided by the benchmark. And the **rule specific to educational material**: what must never be split. That's domain knowledge Claude Code doesn't have. |
 

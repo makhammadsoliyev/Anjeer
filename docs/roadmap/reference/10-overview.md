@@ -10,18 +10,18 @@ The full 30 weeks at a glance.
 | 4 | EF Core 10 + Dapper | `Anjeer.Infrastructure` | — |
 | 5 | Clean Architecture + CQRS | Architecture refactor | — |
 | 6 | **Auth, RBAC, isolation** ⭐ | `Anjeer.Auth` | Roles work |
-| 7 | Question bank and results | Assignments + mastery | Tests get assigned |
+| 7 | Question bank, practice and results | Practice sessions, assignments, mastery | Children practise, tests get assigned |
 | 8 | Materials + Angular | Catalog + keyword search | Materials get found |
-| 9 | **Docker + Container Apps** ⭐ | First deployment | **Center starts using it** |
-| 10 | Key Vault + observability | Keyless auth + OTel | — |
-| 11 | **BUFFER** | Hardening v1.1 | Stable MVP |
+| 9 | **Docker + Hetzner** ⭐ | First deployment | **Teachers work on the live system** |
+| 10 | Secrets, backups, observability | `.env`/SOPS + backups + OTel | Restore tested |
+| 11 | **Pilot preparation** | Hardening v1.1 + content + operations 2a | **Pilot-ready** |
 | 12 | TypeScript (for C# devs) | Typed frontend foundation | — |
 | 13 | Angular fundamentals + debugging | Owning the MVP frontend | Frontend bugs fixed |
 | 14 | DI, change detection, signals | Signal-based dashboard | Faster dashboard |
 | 15 | RxJS + HTTP | Search + interceptors | Smoother search |
 | 16 | **Forms + routing** ⭐ | Test-building flow | Better test flow |
-| 17 | Legacy Angular + NgRx | Migration exercise | — |
-| 18 | LLM + Azure OpenAI | `Anjeer.AiLab` | — |
+| 17 | Operations 2b + parent portal | Schedule, fees, leads, parent portal, bot | First center can switch |
+| 18 | LLM + provider-neutral setup | `Anjeer.AiLab` | Monthly AI ceiling |
 | 19 | AI chat + conversation | Teacher assistant | AI chat works |
 | 20 | Prompt engineering | Prompt library | — |
 | 21 | **Function calling** ⭐ | Data-connected AI | Mastery analysis |
@@ -31,7 +31,7 @@ The full 30 weeks at a glance.
 | 25 | **Production RAG** ⭐ | Q&A + evaluation | AI over materials |
 | 26 | RAG quality improvement | Measured experiments | Quality rises |
 | 27 | **Agent + approval** ⭐ | Worksheet agent | Individual sheets |
-| 28 | MCP server | `Anjeer.Mcp` | — |
+| 28 | Billing | Seats + family subscriptions | **Families can subscribe** |
 | 29 | Security + red team | 18 attack tests | — |
 | 30 | **CI/CD + capstone** 🏆 | Production release | Portfolio ready |
 
@@ -40,8 +40,8 @@ The full 30 weeks at a glance.
 | Phase | Weeks | What gets built | What gets learned |
 |---|---|---|---|
 | Core | 1–6 | Domain, architecture, RBAC | .NET 10, Clean Architecture, ltree |
-| MVP | 7–11 | Tests, materials, deploy | Azure, Docker, observability |
+| MVP | 7–11 | Tests, practice, materials, deploy, pilot prep | Docker, Hetzner, observability |
 | Angular | 12–17 | Taking over the MVP frontend | TypeScript, signals, RxJS, forms |
 | AI foundations | 18–21 | Chat, tools | LLM, prompting, function calling |
 | RAG | 22–26 | Semantic search, Q&A | Embeddings, hybrid, evaluation |
-| Agent | 27–30 | Worksheet agent, MCP | SK, approval, security |
+| Agent | 27–30 | Worksheet agent, billing | SK, approval, security |

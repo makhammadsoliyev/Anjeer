@@ -1,6 +1,8 @@
-# 9. PHASE 6 — Agents, MCP, and production (weeks 27–30)
+# 9. PHASE 6 — Agents, billing, and production (weeks 27–30)
 
-The final phase: a multi-step agent, human-in-the-loop approval, an MCP server, and taking the whole system to production quality.
+The final phase: a multi-step agent with human-in-the-loop approval, the billing that turns the pilot into a product (learner seats for centers, subscriptions for families), security hardening, and taking the whole system to production quality.
+
+The MCP server that used to occupy week 28 was removed on 2026-10-19 (`docs/project-overview.md`, question 21).
 
 ## Weeks in this phase
 

@@ -8,7 +8,7 @@
 
 **Topics to cover:**
 
-1. **Azure Blob Storage** — containers, blobs, access tiers; why files don't live in the database
+1. **Object storage (S3 API, MinIO)** — buckets, objects, presigned URLs; why files don't live in the database; the `IObjectStorage` port so the backend can change
 1. **SAS tokens** — temporary, scoped access; protecting a file URL
 1. **Upload flow** — validation (type, size), virus scanning, metadata
 1. **PostgreSQL full-text search** — `tsvector`, `to_tsquery`, `ts_rank`
@@ -78,8 +78,8 @@ Open the login and material-upload forms Claude wrote in the DevTools Elements p
 **Free resources:**
 
 - **[Docs]** [PostgreSQL — Full Text Search](https://www.postgresql.org/docs/current/textsearch.html) (postgresql.org)
-- **[Docs]** [Azure Blob Storage — .NET quickstart](https://learn.microsoft.com/en-us/azure/storage/blobs/storage-quickstart-blobs-dotnet) (learn.microsoft.com)
-- **[Docs]** [Grant limited access with SAS](https://learn.microsoft.com/en-us/azure/storage/common/storage-sas-overview) (learn.microsoft.com)
+- **[Docs]** [MinIO — .NET SDK quickstart](https://min.io/docs/minio/linux/developers/dotnet/minio-dotnet.html) (min.io)
+- **[Docs]** [AWS SDK for .NET — presigned URLs](https://docs.aws.amazon.com/AmazonS3/latest/userguide/ShareObjectPreSignedURL.html) (docs.aws.amazon.com) — the same S3 API MinIO speaks
 - **[Docs]** [OpenAPI Generator](https://openapi-generator.tech) (openapi-generator.tech)
 - **[Docs]** [Angular — Overview](https://angular.dev/overview) (angular.dev) — enough to sanity-check the code Claude writes
 
@@ -93,7 +93,7 @@ Open the login and material-upload forms Claude wrote in the DevTools Elements p
 
 | Technology | Purpose |
 |---|---|
-| **Azure Blob Storage** | File storage |
+| **MinIO** (S3 API) | File storage |
 | **PostgreSQL FTS** (`tsvector`, GIN) | Keyword search |
 | **UglyToad.PdfPig** | PDF text extraction |
 | **DocumentFormat.OpenXml** | DOCX text extraction |
@@ -124,7 +124,7 @@ DELETE /api/v1/materials/{id}
 **Functional requirements:**
 
 1. Upload PDF, DOCX, image; size and type validation
-1. Files in Blob Storage, metadata in the database
+1. Files in object storage through `IObjectStorage` (MinIO), metadata in the database
 1. Text extracted from PDF/DOCX into `extracted_text`
 1. Keyword search across title + description + text, ranked with `ts_rank`
 1. Filter by topic, grade, kind
@@ -141,9 +141,9 @@ DELETE /api/v1/materials/{id}
 - [ ] The Angular client is generated from OpenAPI (not hand-written)
 - [ ] **Search quality is measured**: 20 real queries, how many succeeded — this number gets compared again in week 23
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | **The entire Angular app** — 7 screens, services, guards, interceptors, styling. On the backend: the upload handler, parsers, migrations. | **The API contract** — endpoints, DTOs, status codes, the pagination shape. And **measuring the baseline search quality** — without this number you can't prove week 23's improvement. |
 

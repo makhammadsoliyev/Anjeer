@@ -61,7 +61,7 @@ IAnswerGenerator → GenerateAsync(query, context)    → RagAnswer
 
 - **[Free course]** [DeepLearning.AI — Building and Evaluating Advanced RAG](https://www.deeplearning.ai/short-courses/building-evaluating-advanced-rag/) (deeplearning.ai)
 - **[Article]** [Anthropic — Introducing Contextual Retrieval](https://www.anthropic.com/news/contextual-retrieval) (anthropic.com)
-- **[Docs]** [RAG in Azure AI Search](https://learn.microsoft.com/en-us/azure/search/retrieval-augmented-generation-overview) (learn.microsoft.com)
+- **[Article]** [Retrieval-Augmented Generation — the original paper](https://arxiv.org/abs/2005.11401) (arxiv.org)
 - **[Article]** [Simon Willison — Prompt injection series](https://simonwillison.net/series/prompt-injection/) (simonwillison.net)
 
 ## Day 3 — PROJECT: Anjeer.Rag — a reusable pipeline
@@ -129,9 +129,9 @@ public async Task Poisoned_Material_Cannot_Override_System_Prompt()
 - [ ] A question outside the context returns "not found"
 - [ ] 8+ unit tests
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | Interface implementations, DI wiring, test doubles, pipeline orchestration. | **Top-K, threshold, the re-ranking prompt, and the context template** — RAG quality rests entirely on these four decisions. Write the injection-protection template yourself too. |
 

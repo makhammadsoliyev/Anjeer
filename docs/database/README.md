@@ -40,7 +40,10 @@ The prefix defines the table type, and the type defines the required columns.
 `created_at timestamptz not null default now()`, `created_by integer`, `last_modified_at timestamptz`, `last_modified_by integer`.
 `enum_` tables have only `created_at` and `last_modified_at`.
 
-**Tenant = branch.** Instead of UzASBO's `organization_id`, Anjeer uses `branch_id` (`adm.info_branch`).
+**Tenant = organization → branch.** Decision of 2026-10-19 (`docs/project-overview.md`, section 0): a center is an
+organization (`adm.info_organization`, to be added to the reference schema in week 3) with branches under it
+(`adm.info_branch.organization_id`). Isolation and indexes keep `branch_id` as the leading column; `organization_id`
+is the outer boundary for CEO-level access. Families without a center belong to the platform's own organization.
 
 **Deletes.** There is no `on delete cascade` anywhere, and rows are never deleted from the database:
 
@@ -252,7 +255,7 @@ How it is written:
 - A small middleware calls `Request.EnableBuffering()` for API requests, so the body can be read again after the endpoint has consumed it.
 - An `IExceptionHandler` (`AddExceptionHandler`) catches the exception, builds the ProblemDetails response, masks the input, puts a record into a `Channel<AppError>` and returns the response immediately.
 - A `BackgroundService` saves the records with a **separate** `DbContext`, because the main request's transaction may already be broken.
-- Errors must not be lost if the database is down, so they are always written to Serilog and Application Insights as well (without the body). The database is an extra, easy-to-query copy.
+- Errors must not be lost if the database is down, so they are always written to Serilog and the OpenTelemetry backend as well (without the body). The database is an extra, easy-to-query copy.
 - Old records (for example, older than 90 days) are cleaned up by a background job.
 
 ## Proposed domain tables (week 3 decision)
@@ -261,9 +264,12 @@ Designing the domain is your decision in week 3. The table below is only a propo
 
 | Roadmap entity | Table | Why |
 |---|---|---|
-| `Branch` | `adm.info_branch` | Tenant, a list shared by all branches |
-| `User` | `adm.sys_user` | System table: staff, teachers and students who can sign in |
+| `Organization` | `adm.info_organization` | A center (tenant root); the platform's own organization holds families |
+| `Branch` | `adm.info_branch` | Owned by an organization |
+| `User` | `adm.sys_user` | System table: staff, teachers, students and parents who can sign in (`adm.enum_user_type`) |
 | `Student` | `edu.hl_student` (`user_id` → `adm.sys_user`, nullable, unique) | Owned by a branch. PII lives here. The account link is optional |
+| `Parent` + link | `edu.hl_parent`, `edu.hl_parent_student` | Parent profiles and the parent–child link with a consent timestamp |
+| `Misconception` | `edu.info_misconception` + `_translate` | A named error per topic; a question's distractor points at one |
 | `Group` | `edu.hl_group` (`teacher_id` → `adm.sys_user`) | Owned by a branch |
 | `Subject` | `edu.info_subject` + `_translate` | Global, 4 languages |
 | `Topic` | `edu.info_topic` + `_translate` (`path ltree`) | Global taxonomy, 4 languages |

@@ -75,9 +75,9 @@ export const teacherGuard: CanActivateFn = () => {
 - [ ] Typing the URL by hand to bypass a guard is still rejected by the backend — two layers
 - [ ] Explain-back: reactive vs. template-driven, and why a guard isn't real protection
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | Admin CRUD forms (branch, user), form styling, date picker setup. | **The test-builder form and its validators** — the core business flow. **Guard and lazy-loading decisions** — which route belongs to which role. |
 

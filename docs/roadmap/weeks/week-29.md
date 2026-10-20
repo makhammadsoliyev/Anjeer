@@ -1,6 +1,6 @@
 # Week 29 — Security and red teaming
 
-> Phase 6 — Agents, MCP, and production (weeks 27–30) · [phase overview](../phases/phase-6.md)
+> Phase 6 — Agents, billing, and production (weeks 27–30) · [phase overview](../phases/phase-6.md)
 >
 > [← Week 28](week-28.md) · [Index](../README.md) · [Week 30 →](week-30.md)
 
@@ -24,7 +24,7 @@ Agent              → cost DoS, infinite loop
 1. **Defense in depth** — one layer of defense is never enough
 1. **PII leakage** — a name appearing in a reply; output filtering
 1. **Cost DoS** — a user triggering too many agent runs
-1. **Azure content filter** — protection at the Azure OpenAI layer; prompt shields
+1. **Content filtering** — the provider's moderation layer plus your own input and output checks; prompt-injection detection
 1. **Extra requirements in a children's context** — inappropriate content, frightening language
 
 | Layer | Defense |
@@ -46,12 +46,12 @@ Agent              → cost DoS, infinite loop
 1. **Output filter** — as an `IChatClient` decorator
 1. **Rate limiting** — a token bucket per user
 1. **Cost limit** — a daily cap; exceeding it disables AI features
-1. **Fallback** — to Ollama if Azure OpenAI is down
+1. **Fallback** — to Ollama if the hosted LLM API is down
 
 **Free resources:**
 
 - **[Article]** [OWASP Top 10 for LLM Applications](https://genai.owasp.org/llm-top-10/) (genai.owasp.org)
-- **[Docs]** [Azure AI Content Safety — Prompt Shields](https://learn.microsoft.com/en-us/azure/ai-services/content-safety/concepts/jailbreak-detection) (learn.microsoft.com)
+- **[Docs]** [OWASP Top 10 for LLM Applications](https://owasp.org/www-project-top-10-for-large-language-model-applications/) (owasp.org)
 - **[Docs]** [Rate limiting middleware in ASP.NET Core](https://learn.microsoft.com/en-us/aspnet/core/performance/rate-limit) (learn.microsoft.com)
 - **[Article]** [Simon Willison — Prompt injection series](https://simonwillison.net/series/prompt-injection/) (simonwillison.net)
 
@@ -81,7 +81,7 @@ Agent              → cost DoS, infinite loop
 | 14 | 100 requests in a minute | 429 |
 | 15 | 50 agent runs in sequence | Cost limit kicks in |
 | 16 | An agent stuck in an infinite loop | Stops at the iteration limit |
-| 17 | Azure OpenAI turned off | Fallback or a clear message |
+| 17 | The hosted LLM API turned off | Fallback or a clear message |
 | 18 | A request for inappropriate content aimed at a child | Refused |
 
 **Functional requirements:**
@@ -102,9 +102,9 @@ Agent              → cost DoS, infinite loop
 - [ ] The threat model is documented
 - [ ] `anjeer-security-reviewer` has reviewed all the AI-related code
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | Defense-layer implementation, test harness, CI integration, rate limiter configuration. | **Think up the attack payloads yourself.** If Claude Code writes both the attacks and the defense, it defends against attacks it already knows about — not a real test. Add attacks specific to a children's context too. |
 

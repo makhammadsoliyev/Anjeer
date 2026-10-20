@@ -119,9 +119,9 @@ FindMaterials(string topicCode, int? grade)
 - [ ] A student name is never sent to the LLM under any circumstance (proven via logs)
 - [ ] Tool calls are fully visible in the audit log
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | Tool-method boilerplate, argument validation code, logging middleware, test scaffolding, showing tool calls in Angular. | Every word of the **`[Description]` text** — the LLM only reads that, and tool-selection accuracy depends directly on it. And **which tools should not exist** — a name-lookup tool is deliberately absent. |
 

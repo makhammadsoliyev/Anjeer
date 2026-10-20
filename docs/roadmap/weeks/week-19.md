@@ -57,7 +57,7 @@ Total context:        8000 tokens
 | Technology | Purpose |
 |---|---|
 | **`Microsoft.Extensions.AI`** | LLM abstraction |
-| **Azure OpenAI** | Model |
+| **Hosted LLM API** (via `IChatClient`) | Model |
 | **PostgreSQL** | Conversation history |
 | `Microsoft.ML.Tokenizers` | Token budget |
 | **Microsoft.FeatureManagement** | Feature flags |
@@ -107,9 +107,9 @@ DELETE /api/v1/ai/conversations/{id}
 - [ ] Another teacher's conversation is never visible
 - [ ] 5+ unit tests, no real API calls
 
-**Claude Code + Superpowers:**
+**Claude Code + Spec Kit:**
 
-| Superpowers does this | You decide and verify |
+| Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
 | SSE controller boilerplate, repository, tests with `IChatClient` mocked, a markdown-rendering component. | **Trimming strategy**: which messages stay, which drop, how much headroom to reserve. **The streaming part of the chat UI** — rendering the SSE stream with signals and cancelling on disconnect; your week-15 RxJS skills come into play here. And the first version of the system prompt. |
 

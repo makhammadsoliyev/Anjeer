@@ -2,17 +2,19 @@
 
 ## 1.1 What Anjeer is
 
-**Anjeer** — an internal system for a learning center that prepares elementary-school students in Uzbekistan for specialized schools (Presidential Schools, the Muhammad al-Khwarizmi named schools).
+**Anjeer** — a subscription platform for learning centers and families that prepare elementary-school students in Uzbekistan for the entrance exams of specialized schools (Presidential Schools, the Muhammad al-Khwarizmi named schools). The product definition and every decision behind it: [docs/project-overview.md](../../project-overview.md), section 0 (2026-10-19).
 
-Three types of users work in the system:
+Five types of users work in the system, inside a tenant that is an organization (a center) with branches:
 
 | Role | What they see | What they do |
 |---|---|---|
-| **CEO** | All branches | Overall statistics, branch and manager administration |
-| **Branch manager** | Their own branch | Teacher, group, and student administration |
-| **Teacher** | Their own groups | Assign tests, view results, search materials, AI assistant |
+| **CEO** | All branches of their center | Overall statistics, branch and manager administration |
+| **Branch manager** | Their own branch | Teacher, group, student administration; attendance, fees |
+| **Teacher** | Their own groups | Approve questions, assign tests, view mastery, search materials, AI assistant |
+| **Student** | Their own practice | Practise approved items, take mocks, see their progress |
+| **Parent** | Their own children | Progress, attendance, mock scores; consent and payment |
 
-Student and parent access may be added in a later stage — but it is out of scope for the MVP.
+Students and parents are in scope from the January 2027 pilot (one class). Families without a center live in the platform's own tenant. The platform owner is an admin role above the centers.
 
 ## 1.2 Why one project
 
@@ -22,7 +24,7 @@ They don't conflict, because the domain maps naturally onto the roadmap's three 
 
 | Roadmap theme | How it shows up in Anjeer |
 |---|---|
-| Multi-tenancy | **CEO → branch → teacher → group** — a genuine four-level isolation model |
+| Multi-tenancy | **organization → branch → teacher → group → student/parent** — a genuine multi-level isolation model |
 | Function calling + DB tools | *"Which topics is Aziza struggling with?"* → topic-level analysis |
 | RAG | **The center's own textbooks and methodology materials** — search and Q&A over them |
 | Human-in-the-loop approval | AI-generated exercises, questions, or notes stay pending **until a teacher approves them** |
@@ -37,17 +39,17 @@ The core requirements of the job posting and which week closes each one:
 | Job requirement | Weeks | Primary artifact |
 |---|---|---|
 | Strong C# skills | 1–5 | `Anjeer.Domain` + architecture refactor |
-| Cloud-native solutions (Azure) | 9–11 | Container Apps, Key Vault, Managed Identity |
+| Cloud and operations (Docker, CI/CD, secrets, backups, observability) | 9–11, 30 | Hetzner deployment, `deploy.sh`, backups with a tested restore, OpenTelemetry |
 | AI-driven applications on .NET | 18–21 | AI chat + function calling |
-| LLM integration | 18–20 | Azure OpenAI + `Microsoft.Extensions.AI` |
+| LLM integration | 18–20 | A hosted LLM API + `Microsoft.Extensions.AI` |
 | RAG integration | 22–26 | Production RAG over materials + evaluation |
-| Docker and containerization | 9 | Dockerfile, docker-compose, Container Apps |
+| Docker and containerization | 9 | Dockerfile, docker-compose, Caddy, Hetzner |
 | **Angular 18+ and TypeScript** | 12–17 | Taking over the MVP frontend + core screens |
-| **GenAI / agentic coding (Claude Code + Superpowers)** | Every week | Section 2 methodology |
+| **GenAI / agentic coding (Claude Code + Spec Kit)** | Every week | Section 2 methodology |
 | Maintainable, documented code | Every week | Definition of Done + README |
 | Explaining complex ideas clearly | 26, 30 | Evaluation report, architecture document |
 
-Many .NET postings (for example, .NET + Angular full-stack roles) additionally ask for **Angular 18+, TypeScript**, and hands-on use of **agentic coding tools like Claude Code**. Phase 3 and section 2 exist for exactly that. Kubernetes is deliberately left out: Azure Container Apps hides its complexity and deployment stays a single command. For Kubernetes questions, your on-prem experience from work is the answer.
+Many .NET postings (for example, .NET + Angular full-stack roles) additionally ask for **Angular 18+, TypeScript**, and hands-on use of **agentic coding tools like Claude Code**. Phase 3 and section 2 exist for exactly that. Kubernetes and the big clouds are deliberately left out: one Hetzner server with Docker Compose is enough for the pilot and the first centers, and deployment stays a single script (decision 20 in the overview). For Kubernetes and Azure questions, your on-prem experience from work is the answer.
 
 ## 1.4 Two tracks
 
@@ -58,8 +60,8 @@ Many .NET postings (for example, .NET + Angular full-stack roles) additionally a
 
 | Track | Hours / week | Contents | Your role |
 |---|---|---|---|
-| **Learning** | 4–5 | Roadmap order, new concepts, weekly project | **Designer** — brainstorming decisions, review, explain-back, kata |
-| **Delivery** | 6–8 | Angular UI, CRUD, bugs, user requests | **Acceptor** — Superpowers runs autonomously, you do the final check |
+| **Learning** | 4–5 | Roadmap order, new concepts, weekly project | **Designer** — constitution review, clarify answers and plan decisions, review, explain-back, kata |
+| **Delivery** | 6–8 | Angular UI, CRUD, bugs, user requests | **Acceptor** — Claude Code runs the Spec Kit flow on larger slices, you write the spec input and do the final check |
 
 ~10–12 hours/week total. If that's not realistic, push the question bank later in the MVP and ship only administration + materials first. Decide this **now**, not two months in.
 
@@ -68,13 +70,13 @@ Many .NET postings (for example, .NET + Angular full-stack roles) additionally a
 | Phase | Weeks | Theme | Business outcome |
 |---|---|---|---|
 | **Phase 1** | 1–6 | Core: .NET 10, domain, architecture, RBAC | Internal foundation ready |
-| **Phase 2** | 7–11 | MVP: question bank, materials, deploy | **The center starts using it** |
-| **Phase 3** | 12–17 | **Angular + TypeScript** (Schwarzmüller courses) | You own the MVP frontend |
+| **Phase 2** | 7–11 | MVP: question bank, practice, materials, deploy, pilot preparation | **Teachers work on the live system; one class pilots from week 13** |
+| **Phase 3** | 12–17 | **Angular + TypeScript** (Schwarzmüller courses) | You own the MVP frontend; operations 2b and the parent portal ship |
 | **Phase 4** | 18–21 | AI foundations: LLM, chat, function calling | Teacher AI assistant |
 | **Phase 5** | 22–26 | RAG: embeddings, hybrid search, evaluation | Q&A over materials |
-| **Phase 6** | 27–30 | Agent, MCP, security, capstone | Individual practice sheets |
+| **Phase 6** | 27–30 | Agent, billing, security, capstone | Individual practice sheets; families can subscribe |
 
-MVP reaches real users around **week 9** (~2.5 months) — inside the 3–4 month deadline. The full roadmap is **30 weeks (~7 months)**. The Angular phase deliberately comes after the MVP: the center doesn't wait, and you learn Angular on real, running code.
+Teachers use the deployed system from **week 9**; one class pilots from **week 13** (January 2027) and its mocks run March–May 2027. The full roadmap is **30 weeks (~7 months)**. The Angular phase deliberately comes after the MVP: the center doesn't wait, and you learn Angular on real, running code.
 
 ## 1.6 Technologies
 
@@ -88,11 +90,11 @@ MVP reaches real users around **week 9** (~2.5 months) — inside the 3–4 mont
 
 #### AI
 
-**Azure OpenAI** · `Microsoft.Extensions.AI` · `IChatClient` · `IEmbeddingGenerator` · Function Calling · Structured Output · **Semantic Kernel** · **MCP** · Ollama (local fallback)
+**A hosted LLM API** (any provider, chosen by price and Uzbek quality) · `Microsoft.Extensions.AI` · `IChatClient` · `IEmbeddingGenerator` · Function Calling · Structured Output · **Semantic Kernel** · Ollama (local fallback)
 
 #### Data and infrastructure
 
-**Azure Database for PostgreSQL** (+ `pgvector`, `ltree`) · Azure Blob Storage · Redis · **Azure Container Apps** · Key Vault · App Configuration · Application Insights · OpenTelemetry
+**PostgreSQL** (+ `pgvector`, `ltree`) · **MinIO** (S3 API) · Redis · **Hetzner Cloud** · Docker Compose · Caddy · OpenTelemetry (Grafana stack)
 
 #### Quality
 
@@ -122,7 +124,7 @@ xUnit · NSubstitute · FluentAssertions · **Testcontainers** · Serilog · **G
 
 > **Rule 6 — AI never sits on the critical path**
 >
-> If Azure OpenAI is down, a teacher must still be able to assign a test, see results, and find a material. AI is an overlay, not a foundation. Every AI feature lives behind a feature flag.
+> If the LLM API is down, a teacher must still be able to assign a test, see results, and find a material. AI is an overlay, not a foundation. Every AI feature lives behind a feature flag.
 
 > **Rule 7 — Every AI feature is measured**
 >
@@ -138,7 +140,7 @@ Labels: **[Docs]** official documentation · **[Article]** blog post or article 
 
 **YouTube items have no direct link** — video URLs change, and a link written from memory could be wrong. Search by channel and title; it's usually the first result.
 
-The key links were checked in October 2026. Microsoft documentation URLs move from time to time (Azure OpenAI pages, for example, moved under Foundry). If a link breaks, search by its title.
+The key links were checked in October 2026. Documentation URLs move from time to time. If a link breaks, search by its title.
 
 **Recommended YouTube channels:**
 
@@ -151,7 +153,6 @@ The key links were checked in October 2026. Microsoft documentation URLs move fr
 | **Raw Coding** | ASP.NET Core internals, auth |
 | **Hussein Nasser** | Databases and backend fundamentals |
 | **TechWorld with Nana** | Docker, DevOps |
-| **John Savill's Technical Training** | Azure |
 | **Decoded Frontend** | Angular deep dives |
 | **Deborah Kurata** | RxJS and signals |
 | **Andrej Karpathy** | How LLMs work |
