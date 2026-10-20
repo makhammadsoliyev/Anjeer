@@ -27,7 +27,7 @@ code, run it as well and merge its findings into the report.
 - **PII:** student name, birth date and parent phone never reach an LLM prompt, a log message or a
   telemetry tag. LLM input uses `student_{id}` + topic code + score only.
 - AI-generated content visible to a child is created as `PendingApproval`; only a teacher approves it.
-- No secrets in code or `appsettings*.json` (User Secrets locally, Managed Identity in Azure).
+- No secrets in code or `appsettings*.json` (User Secrets locally, environment variables or SOPS on the server).
 
 ### Blockers — architecture
 - `Domain` references nothing outside itself; `Application` references only `Domain`;

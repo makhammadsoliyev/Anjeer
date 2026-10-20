@@ -46,7 +46,7 @@ Semantic search:      FINDS IT
 **Free resources:**
 
 - **[Docs]** [.NET AI — Embeddings](https://learn.microsoft.com/en-us/dotnet/ai/conceptual/embeddings) (learn.microsoft.com)
-- **[Docs]** [Azure AI Search — Chunk large documents](https://learn.microsoft.com/en-us/azure/search/vector-search-how-to-chunk-documents) (learn.microsoft.com)
+- **[Article]** [Chunking strategies for LLM applications](https://www.pinecone.io/learn/chunking-strategies/) (pinecone.io)
 - **[YouTube]** 3Blue1Brown — "Transformers, the tech behind LLMs" — a visual explanation of embeddings
 
 ## Day 3 — PROJECT: Anjeer — chunking and indexing pipeline
@@ -59,7 +59,7 @@ Semantic search:      FINDS IT
 
 | Technology | Purpose |
 |---|---|
-| **Azure OpenAI Embeddings** | Vector generation |
+| **Embedding model** via `IEmbeddingGenerator` (hosted API) | Vector generation |
 | `Microsoft.Extensions.AI` | `IEmbeddingGenerator` |
 | `Microsoft.ML.Tokenizers` | Measuring chunk size |
 | `System.Threading.Channels` | Async queue |

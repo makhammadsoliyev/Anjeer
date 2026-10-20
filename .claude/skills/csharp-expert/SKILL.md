@@ -132,7 +132,7 @@ public int Count => items.Count;
 ### Task.WhenAll — DbContext rule
 
 A `DbContext` is **not thread-safe**. Two queries on the same scoped `DbContext`/connection must
-run **sequentially**. `Task.WhenAll` is only for independent I/O (HTTP calls, Blob, Azure OpenAI)
+run **sequentially**. `Task.WhenAll` is only for independent I/O (HTTP calls, object storage, the LLM API)
 or queries that each use their own `IDbContextFactory` instance / connection.
 
 ```csharp

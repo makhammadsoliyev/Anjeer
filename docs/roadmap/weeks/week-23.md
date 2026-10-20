@@ -15,7 +15,7 @@
 1. **Hybrid search** — semantic and keyword together; why both matter
 1. **Reciprocal Rank Fusion** — `score = Σ 1/(k + rank)`, `k=60`; why rank, not raw score
 1. **Metadata filtering** — by topic, grade, branch; pre-filter vs. post-filter
-1. **Azure AI Search as an alternative** — a managed service; comparing cost and capability
+1. **A dedicated vector database as an alternative** — Qdrant in Compose; comparing operations cost and capability with pgvector
 
 **Why hybrid:**
 
@@ -35,12 +35,12 @@ Query: "students mess up comparing fractions"
 
 **Topics to cover:**
 
-1. **Installing pgvector** — `CREATE EXTENSION vector`; enabling it on Azure Database for PostgreSQL
+1. **Installing pgvector** — `CREATE EXTENSION vector`; the `pgvector/pgvector` PostgreSQL image in Compose
 1. **EF Core mapping** — `Pgvector.EntityFrameworkCore`
 1. **A complex RRF query with Dapper** — EF Core can't express this
 1. **Creating the HNSW index** — inside a migration
 1. **Measuring performance** — `EXPLAIN ANALYZE`, p95 latency
-1. **Azure AI Search spike** — a one-day experiment, no ongoing cost
+1. **Qdrant spike** — a one-day experiment in Compose, thrown away afterwards
 
 **Hybrid RRF query:**
 
@@ -77,7 +77,7 @@ LIMIT @topK;
 
 - **[GitHub]** [pgvector](https://github.com/pgvector/pgvector) (github.com)
 - **[GitHub]** [pgvector-dotnet](https://github.com/pgvector/pgvector-dotnet) (github.com)
-- **[Docs]** [Azure AI Search — Hybrid search scoring (RRF)](https://learn.microsoft.com/en-us/azure/search/hybrid-search-ranking) (learn.microsoft.com)
+- **[Docs]** [Elasticsearch — Reciprocal rank fusion](https://www.elastic.co/guide/en/elasticsearch/reference/current/rrf.html) (elastic.co) — the clearest explanation of RRF
 
 ## Day 3 — PROJECT: Anjeer — hybrid search
 
@@ -93,7 +93,7 @@ LIMIT @topK;
 | **HNSW index** | Fast search |
 | **PostgreSQL FTS** | Keyword side |
 | **Dapper** | RRF query |
-| **Azure AI Search** | A one-day comparison spike |
+| **Qdrant** | A one-day comparison spike |
 | **Testcontainers** | Testing against `pgvector/pgvector:pg17` |
 
 **Functional requirements:**
@@ -104,7 +104,7 @@ LIMIT @topK;
 1. Metadata filter: topic, grade, kind, branch
 1. Branch isolation holds in vector search too
 1. **Week 8's 20 queries are re-measured**
-1. A one-day Azure AI Search comparison; results documented
+1. A one-day Qdrant comparison; results documented
 
 **Measurement — this week's main result:**
 
@@ -121,13 +121,13 @@ LIMIT @topK;
 - [ ] p95 < 300ms (at real corpus size)
 - [ ] `EXPLAIN` confirms the HNSW index is used
 - [ ] No chunk from another branch ever surfaces
-- [ ] The Azure AI Search comparison is documented (cost and capability)
+- [ ] The Qdrant comparison is documented (operations cost and capability)
 
 **Claude Code + Spec Kit:**
 
 | Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
-| pgvector migration, EF mapping, wiring the RRF query into code, the benchmark harness, updating the Angular search UI. | **Understanding the RRF math** — why fusion works on rank, what `k=60` means. And **the reasoning behind Azure AI Search vs. pgvector** — a direct interview question. |
+| pgvector migration, EF mapping, wiring the RRF query into code, the benchmark harness, updating the Angular search UI. | **Understanding the RRF math** — why fusion works on rank, what `k=60` means. And **the reasoning behind a dedicated vector database vs. pgvector** — a direct interview question. |
 
 **Git commit:** `feat: hybrid search with pgvector and RRF`
 

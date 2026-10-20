@@ -1,4 +1,4 @@
-# Week 9 — Docker and Azure Container Apps ⭐
+# Week 9 — Docker and the first Hetzner deployment ⭐
 
 > Phase 2 — Delivering the MVP (weeks 7–11) · [phase overview](../phases/phase-2.md)
 >
@@ -11,10 +11,10 @@
 1. **Multi-stage Dockerfiles** — build and runtime as separate stages; shrinking image size
 1. **Layer caching** — `csproj` first, restore as its own layer; why order matters
 1. **Non-root user** — `USER app`; why root is dangerous
-1. **docker-compose** — API + Angular + PostgreSQL + Redis; `depends_on`, `healthcheck`, volumes
+1. **docker-compose** — API + Angular + PostgreSQL + MinIO + Redis; `depends_on`, `healthcheck`, volumes
 1. **Image tagging** — why `latest` doesn't belong in production; semantic version + git SHA
-1. **Azure Container Apps** — environments, revisions, ingress, scale rules
-1. **Container Registry** — pushing images, pulling with Managed Identity
+1. **Reverse proxy and TLS** — Caddy (automatic Let's Encrypt) or Traefik in front of the API and the Angular build
+1. **Container registry** — GitHub Container Registry (`ghcr.io`): CI pushes, the server pulls with a read-only token
 1. **Graceful shutdown** — `SIGTERM`, `IHostApplicationLifetime`; letting in-flight requests finish
 
 **Multi-stage Dockerfile:**
@@ -36,18 +36,19 @@ USER app
 ENTRYPOINT ["dotnet", "Anjeer.Api.dll"]
 ```
 
-## Day 2 — Build: shipping to Azure
+## Day 2 — Build: shipping to Hetzner
 
 **Topics to cover:**
 
-1. **Deploy with the Azure CLI** — `az containerapp up --source .` builds, pushes, and creates in one command
-1. **`deploy.sh`** — every `az` command in a single, repeatable script; no clicking through the portal
-1. **Azure Database for PostgreSQL** — Flexible Server, firewall, connection pooling
-1. **Region choice** — latency to Uzbekistan; the database and AI can live in different regions
-1. **Health probes** — liveness vs. readiness, and how Container Apps uses them
-1. **Scale rules** — HTTP concurrency; minimum replicas and cold start
-1. **Angular deploy** — static files; Container Apps or Static Web Apps
+1. **Hetzner Cloud server** — create it with the `hcloud` CLI, Ubuntu LTS, a cloud firewall that opens only 22, 80 and 443
+1. **Location choice** — Falkenstein/Nuremberg or Helsinki; latency to Uzbekistan, and the country must be on the decree-415 adequacy list (see `docs/project-overview.md`, section 0)
+1. **`deploy.sh`** — every step in a single, repeatable script: pull images by git SHA, run migrations, `docker compose up -d`; no clicking in a console
+1. **PostgreSQL in Compose** — a named volume, `pg_isready` healthcheck, memory settings; why there is no managed database (cost) and what that obliges you to (week 10: backups)
+1. **MinIO in Compose** — S3 API, buckets, presigned URLs; the `IObjectStorage` port from week 8 now points at MinIO
+1. **Health probes** — `/health/live` and `/health/ready`; Compose `healthcheck` and Caddy health checks
+1. **Angular deploy** — the production build served as static files by Caddy
 1. **Migrations in production** — never automatic; a separate step inside `deploy.sh`
+1. **Updates and rollback** — `docker compose up -d` with healthchecks; rolling back is changing the image tag and running the script again
 
 ## HTML/CSS minimum — the box model and Flexbox (~2 hours)
 
@@ -72,27 +73,29 @@ First play Flexbox Froggy to the end (~1 hour). Then open Anjeer's header and to
 
 - **[Docs]** [Docker — Multi-stage builds](https://docs.docker.com/build/building/multi-stage/) (docs.docker.com)
 - **[Docs]** [Containerize a .NET app](https://learn.microsoft.com/en-us/dotnet/core/docker/build-container) (learn.microsoft.com)
-- **[Docs]** [Azure Container Apps documentation](https://learn.microsoft.com/en-us/azure/container-apps/) (learn.microsoft.com)
+- **[Docs]** [Hetzner Cloud documentation](https://docs.hetzner.com/cloud/) (docs.hetzner.com)
+- **[Docs]** [Caddy — Getting started](https://caddyserver.com/docs/getting-started) (caddyserver.com)
+- **[Docs]** [MinIO — Container quickstart](https://min.io/docs/minio/container/index.html) (min.io)
 - **[YouTube]** TechWorld with Nana — "Docker Tutorial for Beginners"
-- **[YouTube]** John Savill's Technical Training — Azure Container Apps
 
-## Day 3 — PROJECT: Anjeer — first Azure deployment
+## Day 3 — PROJECT: Anjeer — first Hetzner deployment
 
-**What it is:** Containerizing the whole system and shipping it to Azure. **The center starts using the system for real starting this week.**
+**What it is:** Containerizing the whole system and shipping it to a Hetzner Cloud server. **From this week the center's teachers work on the live system**: they enter and approve the questions the January pilot needs (`docs/project-overview.md`, section 9A).
 
-**Why it matters:** "Deployed" and "works on localhost" are entirely different sentences in an interview. Beyond that, real users give real feedback.
+**Why it matters:** "Deployed" and "works on localhost" are entirely different sentences in an interview. Beyond that, real users give real feedback, and the pilot content cannot wait for January.
 
 **What you'll use:**
 
 | Technology | Purpose |
 |---|---|
 | **Docker** | Containerization |
-| **docker-compose** | Local orchestration |
-| **Azure Container Apps** | Hosting |
-| **Azure Container Registry** | Image storage |
-| **Azure Database for PostgreSQL** | Database |
-| **Azure Blob Storage** | Materials |
-| **Azure CLI** | Deployment |
+| **docker-compose** | Orchestration, locally and on the server |
+| **Hetzner Cloud** | Hosting (one server for the pilot) |
+| **Caddy** | Reverse proxy, HTTPS, static files |
+| **GitHub Container Registry** | Image storage |
+| **PostgreSQL** (container) | Database |
+| **MinIO** (container) | Materials and, later, videos (S3 API) |
+| **hcloud CLI** | Server, firewall, SSH keys |
 
 **Project structure:**
 
@@ -100,44 +103,45 @@ First play Flexbox Froggy to the end (~1 hour). Then open Anjeer's header and to
 Anjeer/
 ├── src/ ...
 ├── frontend/
-│   └── Dockerfile                 ← nginx + Angular build
+│   └── Dockerfile                 ← Angular production build
 ├── src/Anjeer.Api/Dockerfile
 ├── docker-compose.yml
 ├── docker-compose.override.yml    ← local settings
+├── docker-compose.prod.yml        ← server: Caddy, volumes, restart policies
 └── deploy/
-    ├── 01-resource-group.sh
-    ├── 02-postgres.sh
-    ├── 03-storage.sh
-    ├── 04-container-apps.sh
-    └── deploy.sh                  ← runs everything in order
+    ├── Caddyfile
+    ├── 01-server.sh               ← hcloud: server, firewall, SSH key
+    ├── 02-bootstrap.sh            ← Docker, deploy user, directories
+    └── deploy.sh                  ← pull by SHA, migrate, up -d
 ```
 
 **Functional requirements:**
 
 1. Multi-stage Dockerfile, non-root, image < 250 MB
-1. docker-compose: API + Angular + PostgreSQL + Redis in one command
-1. `deploy.sh` — repeatable, no portal clicking
+1. docker-compose: API + Angular + PostgreSQL + MinIO + Redis in one command
+1. `deploy.sh` — repeatable; images pulled from `ghcr.io` by git SHA
+1. Caddy with automatic HTTPS; only ports 22, 80 and 443 open
 1. Liveness and readiness probes configured
 1. Graceful shutdown works
 1. Migrations are an explicit step in the deploy script
-1. Angular production build and deploy
-1. Scale rule: minimum 1 replica
+1. Angular production build served by Caddy
+1. Materials from week 8 go through `IObjectStorage` to MinIO (no local disk)
 
 **Acceptance Criteria:**
 
 - [ ] `docker compose up` brings up the whole stack locally
-- [ ] It runs on Azure with a live URL
-- [ ] **At least 2 teachers have used it for real**
-- [ ] Deployment is repeatable via `deploy.sh`
-- [ ] README includes an architecture diagram and deploy steps
+- [ ] It runs on Hetzner with a live HTTPS URL
+- [ ] **At least 2 teachers have logged in and entered questions**
+- [ ] Deployment is repeatable via `deploy.sh`; a rollback to the previous image was tried once
+- [ ] README includes an architecture diagram, deploy steps and the monthly server cost
 
 **Claude Code + Spec Kit:**
 
 | Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
-| Dockerfiles, compose files, `deploy.sh`, nginx configuration — pure boilerplate, fully delegated. | **Region choice** and **scale decisions**: how many minimum replicas, how cold start affects users. And the Azure cost estimate — what it runs per month. |
+| Dockerfiles, compose files, `Caddyfile`, `deploy.sh`, `hcloud` scripts — pure boilerplate, fully delegated. | **Server size and location** (the adequacy-list check), **what runs on one server and what gets its own**, and the monthly cost estimate. |
 
-**Git commit:** `feat: containerize and deploy to Azure Container Apps`
+**Git commit:** `feat: containerize and deploy to Hetzner Cloud`
 
 ---
 

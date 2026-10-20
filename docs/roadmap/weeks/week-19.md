@@ -57,7 +57,7 @@ Total context:        8000 tokens
 | Technology | Purpose |
 |---|---|
 | **`Microsoft.Extensions.AI`** | LLM abstraction |
-| **Azure OpenAI** | Model |
+| **Hosted LLM API** (via `IChatClient`) | Model |
 | **PostgreSQL** | Conversation history |
 | `Microsoft.ML.Tokenizers` | Token budget |
 | **Microsoft.FeatureManagement** | Feature flags |

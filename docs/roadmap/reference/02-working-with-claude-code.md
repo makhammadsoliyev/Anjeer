@@ -49,7 +49,7 @@ specialized schools. Users: CEO, branch manager, teacher.
 Backend:  .NET 10, C# 14, ASP.NET Core (controllers), EF Core 10,
           Dapper, PostgreSQL (+ pgvector, ltree)
 Frontend: Angular + TypeScript
-AI:       Azure OpenAI, Microsoft.Extensions.AI
+AI:       a hosted LLM API through Microsoft.Extensions.AI
 
 ## Architecture
 - Clean Architecture: Api → Application → Domain ← Infrastructure
@@ -67,7 +67,7 @@ AI:       Azure OpenAI, Microsoft.Extensions.AI
   an LLM prompt. Only student_{id} + topic code + score.
 - AI content visible to a child is created as PendingApproval;
   a teacher must approve it.
-- No secrets in code: local User Secrets, Azure Managed Identity.
+- No secrets in code: User Secrets locally, environment/SOPS on the server.
 - Every public method takes a CancellationToken.
 
 ## Testing
@@ -89,7 +89,7 @@ This file grows every week: architecture rules in week 5, tool design rules in w
 - **Plan mode** — before a large refactor, Claude Code shows a plan first without touching anything. Reading the plan also forces you to think through the architecture
 - **Subagents** (`.claude/agents/`) — for recurring roles; two examples below
 - **Hooks** — a `PostToolUse` hook can run `dotnet format` or `ng lint` after every edit
-- **Connecting an MCP server** — in week 28 you connect your own MCP server directly to Claude Code
+- **Connecting MCP servers** — Claude Code can use external MCP servers (GitHub, databases); Anjeer no longer ships its own (decision of 2026-10-19)
 
 ### Subagent 1 — security reviewer
 
@@ -313,16 +313,16 @@ python docs/roadmap/tools/roadmap_issues.py --weeks 1-6             # phase 1
 | 6 | 18.11 | 21.11 | 22.11 | [Auth, RBAC, and branch isolation ⭐](../weeks/week-06.md) |
 | 7 | 25.11 | 28.11 | 29.11 | [Question bank and results](../weeks/week-07.md) |
 | 8 | 02.12 | 05.12 | 06.12 | [Materials and the Angular frontend](../weeks/week-08.md) |
-| 9 | 09.12 | 12.12 | 13.12 | [Docker and Azure Container Apps ⭐](../weeks/week-09.md) |
-| 10 | 16.12 | 19.12 | 20.12 | [Azure security and observability](../weeks/week-10.md) |
-| 11 | 23.12 | 26.12 | 27.12 | [BUFFER: hardening and real feedback](../weeks/week-11.md) |
+| 9 | 09.12 | 12.12 | 13.12 | [Docker and the first Hetzner deployment ⭐](../weeks/week-09.md) |
+| 10 | 16.12 | 19.12 | 20.12 | [Secrets, backups and observability](../weeks/week-10.md) |
+| 11 | 23.12 | 26.12 | 27.12 | [Pilot preparation: hardening, content and operations](../weeks/week-11.md) |
 | 12 | 30.12 | 02.01 | 03.01 | [TypeScript (through a C# developer's eyes)](../weeks/week-12.md) |
 | 13 | 06.01 | 09.01 | 10.01 | [Angular fundamentals and debugging](../weeks/week-13.md) |
 | 14 | 13.01 | 16.01 | 17.01 | [Services, DI, change detection, and signals](../weeks/week-14.md) |
 | 15 | 20.01 | 23.01 | 24.01 | [RxJS and HTTP](../weeks/week-15.md) |
 | 16 | 27.01 | 30.01 | 31.01 | [Forms, routing, and guards ⭐](../weeks/week-16.md) |
-| 17 | 03.02 | 06.02 | 07.02 | [Legacy Angular and an NgRx introduction](../weeks/week-17.md) |
-| 18 | 10.02 | 13.02 | 14.02 | [LLM fundamentals and Azure OpenAI](../weeks/week-18.md) |
+| 17 | 03.02 | 06.02 | 07.02 | [Operations 2b and the parent portal](../weeks/week-17.md) |
+| 18 | 10.02 | 13.02 | 14.02 | [LLM fundamentals and a provider-neutral setup](../weeks/week-18.md) |
 | 19 | 17.02 | 20.02 | 21.02 | [AI chat and conversation memory](../weeks/week-19.md) |
 | 20 | 24.02 | 27.02 | 28.02 | [Prompt engineering and structured output](../weeks/week-20.md) |
 | 21 | 03.03 | 06.03 | 07.03 | [Function calling and data tools ⭐](../weeks/week-21.md) |
@@ -332,7 +332,7 @@ python docs/roadmap/tools/roadmap_issues.py --weeks 1-6             # phase 1
 | 25 | 31.03 | 03.04 | 04.04 | [Production RAG and evaluation ⭐](../weeks/week-25.md) |
 | 26 | 07.04 | 10.04 | 11.04 | [Improving RAG quality](../weeks/week-26.md) |
 | 27 | 14.04 | 17.04 | 18.04 | [Agent and the individual practice sheet ⭐](../weeks/week-27.md) |
-| 28 | 21.04 | 24.04 | 25.04 | [MCP (Model Context Protocol)](../weeks/week-28.md) |
+| 28 | 21.04 | 24.04 | 25.04 | [Billing: learner seats and family subscriptions](../weeks/week-28.md) |
 | 29 | 28.04 | 01.05 | 02.05 | [Security and red teaming](../weeks/week-29.md) |
 | 30 | 05.05 | 08.05 | 09.05 | [CI/CD and final release 🏆](../weeks/week-30.md) |
 

@@ -1,6 +1,6 @@
 # Week 27 — Agent and the individual practice sheet ⭐
 
-> Phase 6 — Agents, MCP, and production (weeks 27–30) · [phase overview](../phases/phase-6.md)
+> Phase 6 — Agents, billing, and production (weeks 27–30) · [phase overview](../phases/phase-6.md)
 >
 > [← Week 26](week-26.md) · [Index](../README.md) · [Week 28 →](week-28.md)
 

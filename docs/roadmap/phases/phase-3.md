@@ -4,7 +4,7 @@ The MVP is live and the center is using it. Now you take ownership of the Angula
 
 > **Phase boundary — not an Angular specialist**
 >
-> The goal: **write features, read existing code, and debug it**. For a backend-heavy full-stack role, that's enough. Animations, SSR, and deep NgRx are out of scope for this phase.
+> The goal: **write features, read existing code, and debug it**. For a backend-heavy full-stack role, that's enough. Animations, SSR, NgRx and legacy NgModule code are out of scope for this phase. Week 17 is a delivery week (operations 2b and the parent portal); the pilot class is practising while you learn Angular.
 > The Spec Kit flow stays the same here too. But two things get stronger: you **read and explain** every component and service Claude Code writes — that's exactly the "read existing code" skill; and the katas come from the frontend, since an Angular live-coding exercise is possible.
 
 ## Courses: Maximilian Schwarzmüller (Udemy)
@@ -14,7 +14,7 @@ Neither course is watched end to end. Watching both fully would be ~80 hours of 
 | Course | What to watch | Approx. time |
 |---|---|---|
 | **Understanding TypeScript** | Basics & types, compiler config, next-generation JS (JS refresher), classes & interfaces, generics | ~6–8 hours |
-| **Angular – The Complete Guide** | Essentials, debugging, components/DI/change detection deep dives, RxJS, HTTP, forms, routing, modules, NgRx intro | ~22–25 hours |
+| **Angular – The Complete Guide** | Essentials, debugging, components/DI/change detection deep dives, RxJS, HTTP, forms, routing, modules (reading level), deployment and i18n | ~22–25 hours |
 | Skipped | TS: React, Node, Webpack, Vite. Angular: SSR/SSG, animations, the rest of the legacy edition at the end of the course | — |
 
 ~30 hours of video in total, ~50 hours including coding. Section titles may differ slightly in the Udemy curriculum — compare against this table when you open the course. Weekly budget: ~5 hours from the learning track, plus 2–3 hours moved over from the delivery track now that the MVP is live.

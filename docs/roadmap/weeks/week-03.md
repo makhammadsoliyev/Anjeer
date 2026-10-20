@@ -101,7 +101,7 @@ ORDER BY nlevel(path);
 
 **What it is:** Anjeer's domain layer and topic taxonomy, populated with real data.
 
-**Why it matters:** This is the intellectual core of the project. Week 21's "which topic is struggling" and week 27's individual practice sheet both lean entirely on this model.
+**Why it matters:** This is the intellectual core of the project. Week 7's practice sessions, week 21's "which topic is struggling" and week 27's individual practice sheet all lean entirely on this model. The decisions of 2026-10-19 (`docs/project-overview.md`, section 10, step 4) list what the model must carry from the start: organization above branch, Student and Parent, difficulty tier and cognitive level, a misconception catalogue per topic. Question templates, exposure history, lessons and billing get their entities in their own weeks (7, 11, 17, 28), but nothing designed this week may make them hard to add.
 
 **What you'll use:**
 
@@ -117,17 +117,22 @@ ORDER BY nlevel(path);
 
 ```text
 src/Anjeer.Domain/
+ ├── Organizations/Organization.cs   ← tenant: a center; families live in the platform's own one
  ├── Branches/Branch.cs
  ├── Users/
  │    ├── User.cs
  │    └── UserRole.cs
  ├── Students/
  │    ├── Student.cs
- │    └── StudentId.cs            ← strongly-typed ID
+ │    ├── StudentId.cs            ← strongly-typed ID
+ │    ├── Parent.cs
+ │    └── ParentStudent.cs        ← link + consent timestamp
  ├── Curriculum/
  │    ├── Subject.cs
- │    ├── Topic.cs
- │    └── TopicCode.cs            ← value object + validation
+ │    ├── Topic.cs                ← cognitive level from the PIIMA specification
+ │    ├── TopicCode.cs            ← value object + validation
+ │    ├── DifficultyTier.cs       ← easy / medium / hard, as in the exam
+ │    └── Misconception.cs        ← a named error per topic; distractors point at it (week 7)
  ├── Groups/
  │    ├── Group.cs
  │    └── GroupMember.cs
@@ -144,9 +149,10 @@ data/
 1. Every entity checks its invariants in the constructor
 1. `TopicCode` value object validates its format
 1. `ltree` created in a migration, with a GiST index
-1. **At least 4 subjects × 3 grades** of real topic tree is seeded (roughly 150–250 topics)
+1. **At least 4 subjects × 3 grades** of real topic tree is seeded (roughly 150–250 topics), aligned to the PIIMA content areas and cognitive levels (`docs/project-overview.md`, section 2)
 1. Subtree and breadcrumb queries written with Dapper
-1. `branch_id` present on every relevant table and as the leading index column
+1. `Organization` above `Branch`; `organization_id` and `branch_id` present on every relevant table, `branch_id` as the leading index column
+1. `Student`, `Parent` and the parent–student link with a consent timestamp; `DifficultyTier`; a `Misconception` catalogue per topic
 1. Soft delete and audit fields on all core entities
 
 **Acceptance Criteria:**
@@ -155,13 +161,14 @@ data/
 - [ ] `EXPLAIN` confirms the GiST index is used
 - [ ] Invariant tests: an invalid state cannot be constructed
 - [ ] Integration tests pass against Testcontainers
-- [ ] The taxonomy is documented — how to add a new topic
+- [ ] The taxonomy is documented — how to add a new topic, and how it maps to the PIIMA specification
+- [ ] A parent cannot be linked to a student of another organization (invariant test)
 
 **Claude Code + Spec Kit:**
 
 | Claude Code (Spec Kit) does this | You decide and verify |
 |---|---|
-| Entity classes, EF configuration, migrations, the seed loader script, Testcontainers setup. | **The topic tree itself** — this is the center's methodological knowledge, not something to generate. You build it together with teachers. And **aggregate boundaries**: what lives inside `Group`, what doesn't. |
+| Entity classes, EF configuration, migrations, the seed loader script, Testcontainers setup. | **The topic tree itself** — this is the center's methodological knowledge, not something to generate. You build it together with teachers from the PIIMA specification. **Aggregate boundaries**: what lives inside `Group`, what doesn't. And **the misconception catalogue's shape**: how many per topic, who may add one. |
 
 **Git commit:** `feat: domain model with ltree topic taxonomy`
 

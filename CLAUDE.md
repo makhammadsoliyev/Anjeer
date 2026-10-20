@@ -3,6 +3,10 @@
 <!-- Week 1 (W01.3): write the project rules yourself - stack, architecture, non-negotiable rules, testing, code style - and review the Spec Kit constitution (.specify/memory/constitution.md). See docs/roadmap/reference/02-working-with-claude-code.md, sections 2.4 and 2.8. -->
 
 ## Roadmap
+- The product definition and the decisions of 2026-10-19 (SaaS for centers and families, students and
+  parents as users, Hetzner hosting, MinIO, provider-neutral LLM, small AI budget) are in
+  docs/project-overview.md, section 0. A spec or plan must not contradict it; if a roadmap week or the
+  constitution disagrees, say so and propose the amendment instead of choosing silently.
 - The learning plan lives in docs/roadmap/. Current week: docs/roadmap/CURRENT.md
 - Before /speckit-specify, read the current week's file (docs/roadmap/weeks/week-NN.md).
   Its "Day 3 — PROJECT" section and the project issue are the source for the spec.

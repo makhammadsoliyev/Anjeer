@@ -122,9 +122,9 @@ src/Anjeer.Infrastructure/Audit/AuditLogger.cs
 **Functional requirements:**
 
 1. Login, refresh token, logout
-1. `branch_id` lives in the JWT claim; never taken from a request parameter
-1. Three roles: `Ceo`, `BranchManager`, `Teacher`
-1. Resource-based authorization for groups and students
+1. `organization_id` and `branch_id` live in the JWT claims; never taken from a request parameter
+1. Five roles: `Ceo`, `BranchManager`, `Teacher`, `Student`, `Parent` (plus the platform owner as an `is_admin` role above the centers)
+1. Resource-based authorization for groups, students and a parent's own children
 1. An unauthorized resource returns 404 (existence not revealed)
 1. Audit log: who viewed which student's data, and when
 1. Both the query filter and authorization are active
@@ -138,14 +138,17 @@ src/Anjeer.Infrastructure/Audit/AuditLogger.cs
 | Manager A → branch B's student | 404 |
 | Teacher → another branch's material | 404 |
 | Teacher → create a user | 403 |
-| CEO → any branch | 200 |
+| CEO → any branch of their own center | 200 |
+| CEO of center A → a branch of center B | 404 |
+| Parent → another family's child | 404 |
+| Student → another student's results | 404 |
 | Request without a token | 401 |
 | Expired token | 401 |
 | `branch_id` tampered with in the token | 401 (signature breaks) |
 
 **Acceptance Criteria:**
 
-- [ ] 8/8 security tests pass
+- [ ] 11/11 security tests pass
 - [ ] Every cell in table 3.4 is covered by at least one test
 - [ ] The audit log records every access to student data
 - [ ] README includes the role matrix

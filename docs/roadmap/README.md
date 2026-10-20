@@ -1,4 +1,4 @@
-# Anjeer — .NET 10 + Azure AI roadmap (30 weeks)
+# Anjeer — .NET 10 + AI roadmap (30 weeks)
 
 The learning plan behind this repository: one real product (Anjeer, a learning-center platform)
 built while preparing for .NET + AI engineering roles. Three days per week — Learn, Build, Project.
@@ -14,6 +14,8 @@ built while preparing for .NET + AI engineering roles. Three days per week — L
   user makes. The user gives them in `/speckit-clarify` and `/speckit-plan`; never choose them yourself.
 - The rules in [reference/01-about.md](reference/01-about.md) (section 1.7) and
   [reference/02-working-with-claude-code.md](reference/02-working-with-claude-code.md) always apply.
+- The product definition and the decisions of 2026-10-19 live in [../project-overview.md](../project-overview.md),
+  section 0. Where a week's text disagrees with it, the overview wins and the week needs an amendment.
 
 ## Templates and tools
 
@@ -31,7 +33,7 @@ built while preparing for .NET + AI engineering roles. Three days per week — L
 | [3](phases/phase-3.md) | Phase 3 — Angular and TypeScript (weeks 12–17) |
 | [4](phases/phase-4.md) | Phase 4 — AI foundations (weeks 18–21) |
 | [5](phases/phase-5.md) | Phase 5 — RAG (weeks 22–26) |
-| [6](phases/phase-6.md) | Phase 6 — Agents, MCP, and production (weeks 27–30) |
+| [6](phases/phase-6.md) | Phase 6 — Agents, billing, and production (weeks 27–30) |
 
 ## Weeks
 
@@ -43,18 +45,18 @@ built while preparing for .NET + AI engineering roles. Three days per week — L
 | 4 | [EF Core 10 and Dapper](weeks/week-04.md) | 1 |
 | 5 | [Clean Architecture and CQRS](weeks/week-05.md) | 1 |
 | 6 | [Auth, RBAC, and branch isolation ⭐](weeks/week-06.md) | 1 |
-| 7 | [Question bank and results](weeks/week-07.md) | 2 |
+| 7 | [Question bank, practice and results](weeks/week-07.md) | 2 |
 | 8 | [Materials and the Angular frontend](weeks/week-08.md) | 2 |
-| 9 | [Docker and Azure Container Apps ⭐](weeks/week-09.md) | 2 |
-| 10 | [Azure security and observability](weeks/week-10.md) | 2 |
-| 11 | [BUFFER: hardening and real feedback](weeks/week-11.md) | 2 |
+| 9 | [Docker and the first Hetzner deployment ⭐](weeks/week-09.md) | 2 |
+| 10 | [Secrets, backups and observability](weeks/week-10.md) | 2 |
+| 11 | [Pilot preparation: hardening, content and operations](weeks/week-11.md) | 2 |
 | 12 | [TypeScript (through a C# developer's eyes)](weeks/week-12.md) | 3 |
 | 13 | [Angular fundamentals and debugging](weeks/week-13.md) | 3 |
 | 14 | [Services, DI, change detection, and signals](weeks/week-14.md) | 3 |
 | 15 | [RxJS and HTTP](weeks/week-15.md) | 3 |
 | 16 | [Forms, routing, and guards ⭐](weeks/week-16.md) | 3 |
-| 17 | [Legacy Angular and an NgRx introduction](weeks/week-17.md) | 3 |
-| 18 | [LLM fundamentals and Azure OpenAI](weeks/week-18.md) | 4 |
+| 17 | [Operations 2b and the parent portal](weeks/week-17.md) | 3 |
+| 18 | [LLM fundamentals and a provider-neutral setup](weeks/week-18.md) | 4 |
 | 19 | [AI chat and conversation memory](weeks/week-19.md) | 4 |
 | 20 | [Prompt engineering and structured output](weeks/week-20.md) | 4 |
 | 21 | [Function calling and data tools ⭐](weeks/week-21.md) | 4 |
@@ -64,7 +66,7 @@ built while preparing for .NET + AI engineering roles. Three days per week — L
 | 25 | [Production RAG and evaluation ⭐](weeks/week-25.md) | 5 |
 | 26 | [Improving RAG quality](weeks/week-26.md) | 5 |
 | 27 | [Agent and the individual practice sheet ⭐](weeks/week-27.md) | 6 |
-| 28 | [MCP (Model Context Protocol)](weeks/week-28.md) | 6 |
+| 28 | [Billing: learner seats and family subscriptions](weeks/week-28.md) | 6 |
 | 29 | [Security and red teaming](weeks/week-29.md) | 6 |
 | 30 | [CI/CD and final release 🏆](weeks/week-30.md) | 6 |
 
