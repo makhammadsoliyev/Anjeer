@@ -36,7 +36,7 @@ grouped by area; Uzbek and Russian UI labels are decided per term when the i18n 
 | **Cognitive level** | PIIMA's level of thinking required by an item (knowledge, application, reasoning) | Difficulty tier |
 | **Distractor** | A wrong option; every distractor carries a misconception tag and an explanation | Option |
 | **Misconception** | A named reason for a wrong answer ("adds denominators"), teacher-curated per topic; the headline "diagnosis" feature | Mistake |
-| **Explanation** | The approved text shown after a wrong answer, in uz/ru/en; pre-authored, never generated at learning time | Hint |
+| **Explanation** | The approved text shown after a wrong answer, in uz/uz-Cyrl/ru/en; pre-authored, never generated at learning time | Hint |
 | **Practice session** | 20–30 minutes of non-repeating items with immediate explanations and follow-ups | Mock |
 | **Exposure** | The record that a student has seen an item, with the outcome; drives the exposure rule | Attempt |
 | **Exposure rule** | Correct first time → retired for that student; wrong → Leitner schedule (ADR-0007) | — |
@@ -75,7 +75,7 @@ grouped by area; Uzbek and Russian UI labels are decided per term when the i18n 
 | **Document** | A row with a workflow (`doc_`), `status_id`, deleted by status Deleted | Reference data |
 | **Audit log** | The record of every access to student data (constitution III) | Application log |
 | **Audit columns** | `created_at`, `created_by`, `last_modified_at`, `last_modified_by` on every table | Audit log |
-| **Translate table** | `*_translate` rows holding uz/ru/en text of a main table | i18n resource file |
+| **Translate table** | `*_translate` rows holding uz-Cyrl/ru/en text of a main table (Uzbek Latin is in the main table) | i18n resource file |
 | **Spec (week)** | The Spec Kit folder `specs/week-NN/` for one weekly project | ADR, RFC |
 | **Constitution** | `.specify/memory/constitution.md`, the principles every plan is checked against | ADR |
 | **ADR** | A recorded, immutable decision in `docs/adr/` | RFC |

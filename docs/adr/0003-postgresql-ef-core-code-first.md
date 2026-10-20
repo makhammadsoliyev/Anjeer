@@ -17,7 +17,8 @@ PostgreSQL is the only database, with the `ltree` and `pgvector` extensions. The
 only by EF Core migrations (code-first) that live in the repository and are applied as an explicit
 production step. `docs/database/001_core_schema.sql` is a reference, never executed; every migration
 must match it (tables, columns, types, constraints, seeds) and the conventions in
-`docs/database/README.md` (prefixes, audit columns, `branch_id`, naming, three languages). Reads that
+`docs/database/README.md` (prefixes, audit columns, `branch_id`, naming, four languages: uz, uz-Cyrl,
+ru, en). Reads that
 need SQL features beyond LINQ use Dapper. No cascade deletes; soft delete by `status_id` / `state_id`.
 
 ## Alternatives considered
