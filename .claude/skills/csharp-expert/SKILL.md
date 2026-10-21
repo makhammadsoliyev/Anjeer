@@ -5,8 +5,9 @@ description: Modern C# 14 / .NET 10 language and style rules for Anjeer. Use whe
 
 # C# 14 / .NET 10 — Anjeer style
 
-This skill covers **language and code style only**. Architecture rules (Clean Architecture, CQRS,
-controllers, multi-tenancy via `branch_id`, SQL window functions) live in `CLAUDE.md` — follow both.
+This skill covers **language and code style only**. Architecture rules (Clean Architecture, CQRS with
+Mediator, AutoMapper, controllers, multi-tenancy via `branch_id`, SQL window functions) live in
+`CLAUDE.md` and `.claude/rules/` (architecture, api-conventions, database, testing) — follow both.
 
 ## 1. Types and files
 
@@ -16,15 +17,20 @@ controllers, multi-tenancy via `branch_id`, SQL window functions) live in `CLAUD
 - Commands, queries, DTOs and responses are `record`s (`sealed record`), with `required` for
   mandatory init-only properties.
 - Nullable reference types are on. Never silence a warning with `!` unless a comment says why.
+- IDs are plain `int` (reference data) or `long` (documents); never `Guid`, never a strongly-typed ID
+  wrapper. No value objects: a code is a `string`, its format is checked in the entity constructor and
+  the validator.
+- Requests implement Mediator's `ICommand<T>` / `IQuery<T>`; read models are `<Entity>Dto`, write
+  inputs `Create<Entity>Request` / `Update<Entity>Request`.
 
 ```csharp
 namespace Anjeer.Application.Students.Create;
 
-public sealed record CreateStudentCommand(string FullName, Guid GroupId) : IRequest<Result<Guid>>;
+public sealed record CreateStudentCommand(string FullName, int GroupId) : ICommand<Result<int>>;
 
-public sealed record StudentResponse
+public sealed record StudentDto
 {
-    public required Guid Id { get; init; }
+    public required int Id { get; init; }
     public required string FullName { get; init; }
     public string? Phone { get; init; }
 }
@@ -33,14 +39,22 @@ public sealed record StudentResponse
 ## 2. Primary constructors for DI
 
 Use primary constructors for injected dependencies; no `_field` + constructor boilerplate.
+Mediator handlers return `ValueTask<T>`.
 
 ```csharp
-public sealed class StudentService(IStudentRepository repository, TimeProvider clock) : IStudentService
+public sealed class GetStudentQueryHandler(IStudentRepository repository, IMapper mapper)
+    : IQueryHandler<GetStudentQuery, Result<StudentDto>>
 {
-    public Task<Student?> GetAsync(Guid id, CancellationToken ct) =>
-        repository.GetByIdAsync(id, ct);
+    public async ValueTask<Result<StudentDto>> Handle(GetStudentQuery query, CancellationToken ct)
+    {
+        var student = await repository.GetByIdAsync(query.Id, ct);
+        return student is null ? Result.NotFound() : mapper.Map<StudentDto>(student);
+    }
 }
 ```
+
+`Result<T>` and its helpers (`Result.NotFound()` above) are placeholders until the week 5 decision
+(ADR-0017); keep the shape, expect the names to change.
 
 Caveats:
 - Primary-constructor parameters are **not readonly**. Never assign to them.
@@ -147,17 +161,25 @@ var groups = await db.Groups.AsNoTracking().ToListAsync(ct);
 
 // Correct — independent I/O
 var summaryTask = chatClient.GetResponseAsync(prompt, cancellationToken: ct);
-var blobTask = blobClient.DownloadContentAsync(ct);
-await Task.WhenAll(summaryTask, blobTask);
+var fileTask = objectStorage.GetAsync(videoKey, ct);
+await Task.WhenAll(summaryTask, fileTask);
 ```
 
 ## 8. Comments
 
-- No XML `/// <summary>` comments on internal code (handlers, services, repositories).
-- **Exception:** controller actions and public request/response DTOs get short `/// <summary>`
-  comments — .NET 10 OpenAPI turns them into the API docs the Angular side reads
-  (`<GenerateDocumentationFile>true</GenerateDocumentationFile>` in the API project).
+- `/// <summary>` is allowed on any type or member (owner decision 2026-10-21) when it helps a
+  reviewer: **one sentence, at most two lines**, saying what the thing is for or the rule it enforces,
+  not restating its name or signature. No `<param>` / `<returns>` blocks unless the meaning is not
+  obvious from the name.
+- Controllers and public request/response DTOs always get one: .NET 10 OpenAPI turns them into the API
+  docs the Angular client reads (`<GenerateDocumentationFile>true</GenerateDocumentationFile>` in the
+  API project).
 - Inline comments only when the *why* is not obvious.
+
+```csharp
+/// <summary>Retires the item for this student on a correct first answer; otherwise schedules it on Leitner.</summary>
+public sealed class SubmitAnswerHandler(...) : ICommandHandler<SubmitAnswerCommand, Result<AnswerDto>>
+```
 
 ## 9. Quick reference
 
@@ -172,11 +194,15 @@ await Task.WhenAll(summaryTask, blobTask);
 | Simple member | `=>` body | block with single `return` |
 | Async | `CancellationToken ct` last, passed down | `.Result`, `async void` |
 | Parallel | `WhenAll` for independent I/O | `WhenAll` on one `DbContext` |
-| DTOs | `sealed record` + `required` | mutable classes with setters |
-| Comments | inline *why*; XML only on controllers/DTOs | XML on everything |
+| DTOs | `sealed record` + `required`, named `<Entity>Dto` | mutable classes with setters |
+| IDs | `int` / `long` | `Guid`, `StudentId` wrapper types |
+| Handlers | `ICommandHandler` / `IQueryHandler` returning `ValueTask<T>` | services called from controllers |
+| Mapping | AutoMapper `Profile`, `ProjectTo<TDto>()` in queries | hand-mapping the same shape in many places |
+| Comments | short `<summary>` (≤ 2 lines) where it helps review; always on controllers/DTOs | long XML blocks, `<param>` for obvious names |
 
 ## 10. Before you finish
 
 Re-read the diff and check: braces everywhere, `ct` passed through every async call, no shared
-`DbContext` in `Task.WhenAll`, no `_field` DI boilerplate, records for DTOs, no XML comments outside
-the API surface. Then run `dotnet build` and make sure it has no warnings.
+`DbContext` in `Task.WhenAll`, no `_field` DI boilerplate, records for DTOs, `int`/`long` IDs, every
+`<summary>` at most two lines, controllers and DTOs documented. Then run `dotnet build` and make sure it
+has no warnings.
