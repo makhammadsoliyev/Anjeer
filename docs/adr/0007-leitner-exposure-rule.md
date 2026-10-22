@@ -1,6 +1,6 @@
 # ADR-0007: Question exposure rule with a Leitner schedule
 
-**Status**: Accepted
+**Status**: Accepted; refined (not superseded) by [ADR-0016](0016-scheduler-refinements.md) on 2026-10-21
 **Date**: 2026-10-19
 **Deciders**: project owner
 **Related**: `docs/project-overview.md` decision 7 and menu 7; headline feature "diagnosis"
