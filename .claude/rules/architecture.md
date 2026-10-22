@@ -65,7 +65,8 @@ amends this file; until then the open points are marked.
 - `TimeProvider` for time, never `DateTime.Now` / `UtcNow` directly
 - Global query filters for `branch_id` and soft delete; bypassing them needs an explicit, reviewed reason
 - Feature flags around every AI feature; the product works with them off
-- **AutoMapper** for entity → DTO and request → command mapping (owner decision 2026-10-21): one
+- **AutoMapper 14.x** (never 15+, which needs a licence key) for entity → DTO and request → command
+  mapping (owner decision 2026-10-21): one
   `Profile` per feature folder in `Anjeer.Application`, registered by assembly scanning; queries project
   with `ProjectTo<TDto>()` so EF Core selects only the needed columns. `Anjeer.Domain` never references
   AutoMapper. Every profile is covered by `AssertConfigurationIsValid()` in a unit test. Mapping never
@@ -77,13 +78,14 @@ amends this file; until then the open points are marked.
 - Business logic in controllers, or a `DbContext` injected into a controller
 - Entities returned from the API, or request DTOs reused as entities
 - Exceptions for control flow (`throw` to signal "not found" or "invalid")
-- Generic `IRepository<T>` / `IUnitOfWork` abstractions over `DbContext`; repositories are per
-  aggregate with explicit, named methods, and Dapper queries are their own classes
+- Generic `IRepository<T>` / `IUnitOfWork` abstractions over `DbContext`; a repository serves one
+  entity (or one feature) with explicit, named methods, and Dapper queries are their own classes
 - Self-joins or correlated subqueries where a window function does the job; string-concatenated SQL
 - Cascade deletes; hard deletes of documents or reference data
 - `.Result`, `.Wait()`, `async void`, `ConfigureAwait(false)` (ASP.NET Core has no sync context),
   `Task.WhenAll` on one `DbContext`
 - Static mutable state, service locator, `dynamic`, `#region`, `_underscore` private fields
-- Value objects, strongly-typed ID wrappers, or DDD aggregate ceremony beyond entity invariants
+- DDD: no value objects, no strongly-typed ID wrappers, no aggregate roots, no domain events beyond
+  in-process Mediator notifications; an entity checks its own invariants and that is all
 - `BranchId`, student identity or secrets read from configuration files, request bodies or LLM output
 - AI calls at learning time, or an LLM producing a number that reaches the user

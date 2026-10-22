@@ -18,10 +18,12 @@ amendment instead of choosing silently.
 - CQRS with one handler per use case, dispatched by **Mediator** (martinothamar, source-generated,
   ADR-0008): `ICommand<T>` / `IQuery<T>` + handlers, pipeline behaviors for logging, FluentValidation and
   transactions; the `Result<T>` type is a **week 5 decision** (ADR-0017)
-- AutoMapper for entity ↔ DTO mapping (profiles in `Anjeer.Application`, `ProjectTo` in queries)
+- AutoMapper **14.x** for entity ↔ DTO mapping (profiles in `Anjeer.Application`, `ProjectTo` in queries);
+  pinned below 15, which needs a licence key
 - OpenAPI 3.1 via `Microsoft.AspNetCore.OpenApi`, explored with **Swagger UI** (`Swashbuckle.AspNetCore.SwaggerUI`, Development only)
-- xUnit + NSubstitute + FluentAssertions; Testcontainers (PostgreSQL) for integration tests
-- Frontend from week 12 (not in this repo yet): Angular standalone components, signals, PWA; Telegram bot
+- xUnit + NSubstitute + FluentAssertions **7.x** (pinned below 8, which needs a paid licence); Testcontainers (PostgreSQL) for integration tests
+- Frontend from week 8 (Claude Code writes the MVP; the owner takes it over in weeks 12–17; not in this
+  repo yet): Angular standalone components, signals, PWA; Telegram bot
 - Hosting: Hetzner Cloud, Docker Compose, Caddy as the reverse proxy with automatic TLS (owner decision 2026-10-21; Traefik rejected), GitHub Actions, OpenTelemetry from week 10 (ADR-0002)
 - AI: an external LLM through `Microsoft.Extensions.AI`, authoring time only, never for children (ADR-0006)
 
@@ -43,6 +45,8 @@ amendment instead of choosing silently.
 - Test: `dotnet test Anjeer.sln`
 - Format: `dotnet format Anjeer.sln` (CI runs `--verify-no-changes`)
 - Run API: `dotnet run --project src/Anjeer.Api`
+- EF tooling: `dotnet tool restore` (pinned `dotnet-ef` in `dotnet-tools.json`); `src/Anjeer.Api`
+  references `Microsoft.EntityFrameworkCore.Design` from week 4, when the DbContext exists
 - Add migration: `dotnet ef migrations add <Name> -p src/Anjeer.Infrastructure -s src/Anjeer.Api`
 - Update database: `dotnet ef database update -p src/Anjeer.Infrastructure -s src/Anjeer.Api`
 - Issues, PRs, roadmap script, Spec Kit order: `.claude/rules/commands.md`

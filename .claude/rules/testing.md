@@ -34,8 +34,8 @@ done (`docs/roadmap/reference/11-definition-of-done.md`).
 - Test classes: `<TypeUnderTest>Tests`; methods: `Method_Should_Expected_WhenScenario`
   (`Handle_Should_RetireItem_WhenFirstAnswerIsCorrect`). Underscores are allowed in `tests/**` by
   `.editorconfig`.
-- Arrange / Act / Assert with blank lines between; one behaviour per test; FluentAssertions
-  (`result.Should().Be…`), never bare `Assert.Equal`.
+- Arrange / Act / Assert with blank lines between; one behaviour per test; FluentAssertions 7.x
+  (`result.Should().Be…`), never bare `Assert.Equal`. Never upgrade it to 8.x (paid licence).
 - Test data through small builders or factory methods, not shared mutable fixtures; `TimeProvider` is
   faked, never the real clock.
 - A `[Theory]` with `[InlineData]` for tier, locale and role variations instead of copied tests.

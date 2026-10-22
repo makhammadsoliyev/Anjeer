@@ -49,7 +49,8 @@ Source: roadmap week 2 (controller-based API baseline), constitution principles 
 
 ## Cross-cutting
 
-- Health checks at `/health` (liveness) and `/health/ready` (PostgreSQL, MinIO).
+- Health checks at `/health/live` (liveness, no dependencies) and `/health/ready` (PostgreSQL, MinIO),
+  as in roadmap weeks 2 and 9; Compose and Caddy probe these two.
 - Structured logging with correlation id; OpenTelemetry traces from week 10.
 - Authentication: JWT access + refresh tokens; the role matrix and permissions (`PermissionCode`) are
   decided in week 6 (ADR-0009). Route guards on the frontend are UX only; protection lives here.
